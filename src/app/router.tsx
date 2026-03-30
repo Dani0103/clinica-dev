@@ -1,10 +1,10 @@
 // src/router.tsx
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
-import HomePage from "@/features/home/pages/HomePage";
 import DashboardPage from "@/features/dashboard/pages/DashboardPage";
 import Login from "@/features/auth/Login";
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
+import AdminDashBoard from "@/features/adminUser/pages/AdminDashBoard";
 
 // NOTA: Cuando crees los componentes reales, los importarás aquí arriba. Ejemplo:
 // import PacientesPage from "@/features/pacientes/pages/PacientesPage";
@@ -31,10 +31,6 @@ export const router = createBrowserRouter([
           },
           {
             path: "home",
-            element: <HomePage />,
-          },
-          {
-            path: "dashboard",
             element: <DashboardPage />,
           },
           // --- NUEVAS RUTAS DEL SIDEBAR ---
@@ -60,13 +56,7 @@ export const router = createBrowserRouter([
           },
           {
             path: "admin/usuarios",
-            element: (
-              <div className="p-8 flex items-center justify-center h-full">
-                <h1 className="text-2xl font-bold text-clinic-text-base bg-white p-6 rounded-clinic-card shadow-clinic-subtle border-l-4 border-clinic-primary">
-                  Módulo 1: Administración de Usuarios ⚙️
-                </h1>
-              </div>
-            ),
+            element: <AdminDashBoard />,
           },
         ],
       },

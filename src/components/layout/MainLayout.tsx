@@ -8,12 +8,12 @@ function MainLayout() {
   useHeaderScript();
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="h-screen flex flex-col overflow-hidden">
       {/* Header */}
       <Header />
 
       {/* Contenido principal */}
-      <div className="flex flex-1">
+      <div className="h-[calc(100vh_-_128px)] flex flex-1">
         {/* Sidebar */}
         <Sidebar />
 
