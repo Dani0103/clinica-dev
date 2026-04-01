@@ -8,14 +8,14 @@ export default {
           /* Estructura y Fondos */
           "bg-soft": "#E6F0FF", // Azul pálido de fondo general de la app
           "bg-card": "#FFFFFF", // Blanco para las tarjetas (Cards) de información
-          primary: "#6366F1", // Azul/Morado de la Sidebar y parte oscura del degradado
+          primary: "#3E36B0", // Azul/Morado de la Sidebar y parte oscura del degradado
           "primary-light": "#93C5FD", // Azul claro para la parte brillante del degradado
 
           /* Tipografía e Iconos */
           "text-base": "#111827", // Negro/Gris oscuro para nombres y títulos principales
           "text-muted": "#6B7280", // Gris para subtítulos (ej: "Hombre - 32 años")
           "icon-inactive": "#A1A1AA", // Gris para los iconos no seleccionados de la sidebar
-          accent: "#6366F1", // Color de énfasis para elementos activos
+          accent: "#3E36B0", // Color de énfasis para elementos activos
 
           /* Especialidades Médicas (Badges/Etiquetas) */
           "badge-fisio": "#C1EBD6", // Verde pastel para "Fisioterapia"

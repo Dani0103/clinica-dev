@@ -89,11 +89,10 @@ function Sidebar() {
             </>
           )}
         </button>
-
         {/* Botón de Cerrar Sesión */}
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-3 px-3 py-2.5 rounded-clinic-inner text-white hover:bg-red-400 transition-colors duration-200"
+          className="w-full bg-red-500/80 flex items-center justify-center gap-3 px-3 py-2.5 rounded-clinic-inner text-white hover:bg-red-600 transition-colors duration-200"
           title="Cerrar Sesión"
         >
           <HiOutlineLogout size={22} />
