@@ -1,12 +1,9 @@
 import { Outlet } from "react-router-dom";
 import Header from "@/components/layout/Header/Index";
-import { useHeaderScript } from "@/hooks/useHeaderScript";
 import Sidebar from "@/components/layout/SideBar/Index";
 import Footer from "@/components/layout/Footer/Index";
 
 function MainLayout() {
-  useHeaderScript();
-
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       {/* Header */}

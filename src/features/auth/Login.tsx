@@ -30,10 +30,13 @@ const Login: React.FC = () => {
         },
       );
 
-      // Si pasa a esta línea, el login fue exitoso
-      // toast.success("¡Bienvenido a Avanzar IPS!");
-      // login(respuesta.token);
-      // navigate("/home");
+      if (respuesta.status === "success") {
+        // Pasamos los datos a nuestro contexto
+        login(respuesta.data.user, respuesta.data.token);
+        navigate("/home");
+      } else {
+        toast.error(respuesta.message || "Ocurrió un error al iniciar sesión");
+      }
       console.log("respuesta:", respuesta);
     } catch (err: any) {
       // 2. Disparamos la notificación de error usando el mensaje que arrojó el hook

@@ -1,4 +1,3 @@
-// src/context/AuthContext.tsx
 import React, {
   createContext,
   useContext,
@@ -7,10 +6,21 @@ import React, {
   type ReactNode,
 } from "react";
 
-// Definimos los tipos para TypeScript
+// Definimos la estructura del usuario según tu respuesta de API
+interface User {
+  id: number;
+  nombre: string;
+  correo: string;
+  rol_id: number;
+  activo: boolean;
+}
+
+// Definimos los tipos para el contexto
 interface AuthContextType {
   isAuthenticated: boolean;
-  login: (token: string) => void;
+  user: User | null;
+  isLoading: boolean;
+  login: (userData: User, token: string) => void;
   logout: () => void;
 }
 
@@ -20,33 +30,44 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Al cargar la app, verificamos si ya hay un token guardado
   useEffect(() => {
     const token = localStorage.getItem("token_avanzar");
-    if (token) {
+    const storedUser = localStorage.getItem("user_avanzar");
+
+    if (token && storedUser) {
       setIsAuthenticated(true);
+      setUser(JSON.parse(storedUser)); // Convertimos el string de nuevo a objeto
     }
+    setIsLoading(false);
   }, []);
 
-  const login = (token: string) => {
-    localStorage.setItem("token_avanzar", token); // Guardamos sesión
+  const login = (userData: User, token: string) => {
+    localStorage.setItem("token_avanzar", token);
+    localStorage.setItem("user_avanzar", JSON.stringify(userData)); // Guardamos el objeto como string
+
+    setUser(userData);
     setIsAuthenticated(true);
   };
 
   const logout = () => {
-    localStorage.removeItem("token_avanzar"); // Borramos sesión
+    localStorage.removeItem("token_avanzar");
+    localStorage.removeItem("user_avanzar");
+    setUser(null);
     setIsAuthenticated(false);
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, user, isLoading, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Hook personalizado para usar el contexto fácilmente
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
