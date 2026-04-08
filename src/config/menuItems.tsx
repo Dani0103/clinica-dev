@@ -1,8 +1,8 @@
 // src/config/menuItems.tsx
 import {
   HiOutlineViewGrid,
-  HiOutlineUsers,
-  HiOutlineCalendar,
+  // HiOutlineUsers,
+  // HiOutlineCalendar,
   HiOutlineCog,
 } from "react-icons/hi";
 

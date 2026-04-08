@@ -97,7 +97,7 @@ const ForgotPassword: React.FC = () => {
 
       if (respuesta.status === "success") {
         toast.success("Contraseña actualizada exitosamente");
-        navigate("/login");
+        navigate("/");
       }
     } catch (err: any) {
       // MANEJO DE ERRORES 422 (Validación de Laravel)

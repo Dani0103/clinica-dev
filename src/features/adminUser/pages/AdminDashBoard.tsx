@@ -55,7 +55,7 @@ function AdminDashBoard() {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 h-full flex flex-col gap-6">
+    <div className=" h-full flex flex-col gap-6">
       {/* Encabezado */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-clinic-text-base tracking-tight">

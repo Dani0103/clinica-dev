@@ -1,4 +1,8 @@
-import { HiOutlineBell, HiOutlineSearch, HiOutlineCog } from "react-icons/hi";
+import {
+  HiOutlineBell,
+  // HiOutlineSearch,
+  HiOutlineCog,
+} from "react-icons/hi";
 import { FiUser } from "react-icons/fi";
 // Si aún necesitas tu logo aquí, puedes importarlo, pero usualmente
 // en este tipo de layouts el logo ya está en la Sidebar (como lo dejamos antes).

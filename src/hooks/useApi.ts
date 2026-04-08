@@ -1,6 +1,4 @@
 import { useState, useCallback } from "react";
-// 1. Importamos tus URLs base. Ajusta la ruta '@/config/apiEndpoints' según tu proyecto
-import { AppUrls } from "@/api/apiEndpoints"; 
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
@@ -16,9 +14,9 @@ export const useApi = <T = any>() => {
   const [error, setError] = useState<string | null>(null);
 
   // 2. Ahora recibe un 'endpoint' (la ruta relativa) en lugar de la url completa
-  const execute = useCallback(async (url: string,endpoint: string, options?: RequestOptions) => {
+  const execute = useCallback(async (url: string, endpoint: string, options?: RequestOptions) => {
     setIsLoading(true);
-    setError(null); 
+    setError(null);
 
     try {
       const customHeaders: HeadersInit = {
@@ -45,14 +43,14 @@ export const useApi = <T = any>() => {
 
       const result = await response.json();
       setData(result);
-      return result; 
+      return result;
 
     } catch (err: any) {
       const errorMessage = err.message || "Ocurrió un error inesperado al conectar con el servidor.";
       setError(errorMessage);
-      throw err; 
+      throw err;
     } finally {
-      setIsLoading(false); 
+      setIsLoading(false);
     }
   }, []);
 

@@ -14,7 +14,7 @@ import ForgotPassword from "@/features/auth/pages/ForgotPassword";
 export const router = createBrowserRouter([
   // 1. Ruta Pública: Login
   {
-    path: "/login",
+    path: "/",
     element: <Login />,
   },
   {
