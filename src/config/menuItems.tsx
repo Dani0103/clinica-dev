@@ -13,18 +13,18 @@ export const MENU_ITEMS = [
     icon: <HiOutlineViewGrid size={22} />,
     description: "Vista general del sistema",
   },
-  {
-    path: "/pacientes",
-    label: "Pacientes",
-    icon: <HiOutlineUsers size={22} />,
-    description: "Gestión y registro de pacientes",
-  },
-  {
-    path: "/agenda",
-    label: "Agenda y Citas",
-    icon: <HiOutlineCalendar size={22} />,
-    description: "Calendario y programación",
-  },
+  // {
+  //   path: "/pacientes",
+  //   label: "Pacientes",
+  //   icon: <HiOutlineUsers size={22} />,
+  //   description: "Gestión y registro de pacientes",
+  // },
+  // {
+  //   path: "/agenda",
+  //   label: "Agenda y Citas",
+  //   icon: <HiOutlineCalendar size={22} />,
+  //   description: "Calendario y programación",
+  // },
   {
     path: "/admin/usuarios",
     label: "Administración",

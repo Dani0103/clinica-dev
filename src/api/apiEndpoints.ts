@@ -11,11 +11,11 @@ export const API_ENDPOINTS = {
     LOGOUT: 'auth/logout',
     GET_USER: 'user',
   },
-  
+
   // Módulo de Recuperación de Contraseña
   PASSWORD: {
     FORGOT: 'password/forgot',
-    VALIDATE: 'password/validate', 
+    VALIDATE: 'password/validate',
     RESET: 'password/reset',
   },
 

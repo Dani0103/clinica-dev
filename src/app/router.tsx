@@ -2,9 +2,10 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
 import DashboardPage from "@/features/dashboard/pages/DashboardPage";
-import Login from "@/features/auth/Login";
+import Login from "@/features/auth/pages/Login";
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
 import AdminDashBoard from "@/features/adminUser/pages/AdminDashBoard";
+import ForgotPassword from "@/features/auth/pages/ForgotPassword";
 
 // NOTA: Cuando crees los componentes reales, los importarás aquí arriba. Ejemplo:
 // import PacientesPage from "@/features/pacientes/pages/PacientesPage";
@@ -16,7 +17,10 @@ export const router = createBrowserRouter([
     path: "/login",
     element: <Login />,
   },
-
+  {
+    path: "/forgot-password",
+    element: <ForgotPassword />,
+  },
   // 2. Rutas Privadas: Protegidas por el ProtectedRoute
   {
     element: <ProtectedRoute />,

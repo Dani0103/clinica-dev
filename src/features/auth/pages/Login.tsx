@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useApi } from "@/hooks/useApi";
 import { API_ENDPOINTS, AppUrls } from "@/api/apiEndpoints";
@@ -7,7 +7,7 @@ import { toast } from "react-toastify"; // 1. Importamos toast
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
 
   // No necesitamos extraer 'error' del hook si usaremos Toastify
   const { execute, isLoading } = useApi();
@@ -33,7 +33,11 @@ const Login: React.FC = () => {
       if (respuesta.status === "success") {
         // Pasamos los datos a nuestro contexto
         login(respuesta.data.user, respuesta.data.token);
-        navigate("/home");
+        toast.success(respuesta.message || "Bienvenido");
+
+        setTimeout(() => {
+          navigate("/home");
+        }, 2000);
       } else {
         toast.error(respuesta.message || "Ocurrió un error al iniciar sesión");
       }
@@ -44,6 +48,11 @@ const Login: React.FC = () => {
       console.error("Fallo el login", err);
     }
   };
+
+  useEffect(() => {
+    //elimina credenciales del usuario conectado anteriormente
+    logout();
+  }, []);
 
   return (
     <div className="min-h-screen bg-clinic-bg-soft flex items-center justify-center p-4 sm:p-6 lg:p-8">
@@ -89,15 +98,15 @@ const Login: React.FC = () => {
               </label>
 
               <div className="relative group flex items-center">
-                <button
-                  type="button"
+                <Link
+                  to="/forgot-password"
                   className="text-clinic-primary text-[10px] sm:text-xs font-medium hover:underline focus:outline-none"
                 >
                   ¿Olvidó su clave?
-                </button>
+                </Link>
                 <div className="absolute bottom-full right-0 mb-2 w-40 sm:w-48 p-2 sm:p-2.5 bg-gray-800 text-white text-[9px] sm:text-[10px] leading-tight text-center rounded-clinic-inner opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10 shadow-lg">
-                  Por favor, diríjase al área de administración del servicio
-                  para restaurar su acceso.
+                  Haz clic aquí para iniciar el proceso de recuperación de tu
+                  acceso de forma segura.
                   <div className="absolute top-full right-4 border-4 border-transparent border-t-gray-800"></div>
                 </div>
               </div>
