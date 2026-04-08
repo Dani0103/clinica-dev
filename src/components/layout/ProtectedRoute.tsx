@@ -18,7 +18,7 @@ const ProtectedRoute: React.FC = () => {
 
   // 2. Si ya terminó de cargar y NO está autenticado, ahí sí lo devolvemos al login
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   // 3. Si está autenticado, lo dejamos pasar a las rutas hijas (Outlet)

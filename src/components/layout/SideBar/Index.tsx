@@ -17,7 +17,7 @@ function Sidebar() {
   // Función para cerrar sesión de forma segura
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    navigate("/");
   };
 
   return (

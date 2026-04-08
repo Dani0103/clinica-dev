@@ -26,7 +26,7 @@ export const router = createBrowserRouter([
     element: <ProtectedRoute />,
     children: [
       {
-        path: "/",
+        path: "/app",
         element: <MainLayout />,
         children: [
           {
@@ -70,6 +70,6 @@ export const router = createBrowserRouter([
   // 3. Ruta comodín (404 / no encontrada)
   {
     path: "*",
-    element: <Navigate to="/login" replace />,
+    element: <Navigate to="/" replace />,
   },
 ]);

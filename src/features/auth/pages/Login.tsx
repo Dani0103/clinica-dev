@@ -36,7 +36,7 @@ const Login: React.FC = () => {
         toast.success(respuesta.message || "Bienvenido");
 
         setTimeout(() => {
-          navigate("/home");
+          navigate("/app/home");
         }, 2000);
       } else {
         toast.error(respuesta.message || "Ocurrió un error al iniciar sesión");

@@ -246,7 +246,7 @@ const ForgotPassword: React.FC = () => {
 
         <div className="mt-8 text-center">
           <Link
-            to="/login"
+            to="/"
             className="text-clinic-primary text-sm font-medium hover:underline"
           >
             ← Cancelar y volver
