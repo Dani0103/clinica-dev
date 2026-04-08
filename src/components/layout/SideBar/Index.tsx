@@ -11,6 +11,7 @@ import {
   HiOutlineChevronRight,
 } from "react-icons/hi";
 import SidebarItem from "@/components/layout/SideBar/SidebarItem/Index";
+import { MENU_ITEMS } from "@/config/menuItems";
 
 function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
@@ -31,45 +32,15 @@ function Sidebar() {
     >
       {/* Navegación Principal (Le agregamos un pt-8 para que no quede pegado arriba ya que quitamos el logo) */}
       <nav className="flex-1 px-3 pt-8 pb-6 space-y-2 overflow-y-auto">
-        <SidebarItem
-          to="/home"
-          icon={<HiOutlineViewGrid size={22} />}
-          label="Dashboard"
-          collapsed={collapsed}
-        />
-
-        <SidebarItem
-          to="/pacientes"
-          icon={<HiOutlineUsers size={22} />}
-          label="Pacientes"
-          collapsed={collapsed}
-        />
-
-        <SidebarItem
-          to="/agenda"
-          icon={<HiOutlineCalendar size={22} />}
-          label="Agenda y Citas"
-          collapsed={collapsed}
-        />
-
-        {/* Separador Visual para el Módulo 1 */}
-        <div className="pt-4 pb-2">
-          {!collapsed && (
-            <p className="px-4 text-[10px] uppercase tracking-wider text-clinic-primary-light font-semibold">
-              Módulo 1
-            </p>
-          )}
-          {collapsed && (
-            <div className="border-t border-white/10 mx-2 mt-2"></div>
-          )}
-        </div>
-
-        <SidebarItem
-          to="/admin/usuarios"
-          icon={<HiOutlineCog size={22} />}
-          label="Administración"
-          collapsed={collapsed}
-        />
+        {MENU_ITEMS.map((item) => (
+          <SidebarItem
+            key={item.path}
+            to={item.path}
+            icon={item.icon}
+            label={item.label}
+            collapsed={collapsed}
+          />
+        ))}
       </nav>
 
       {/* Sección Inferior: Salir y Colapsar */}
