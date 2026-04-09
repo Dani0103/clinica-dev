@@ -6,7 +6,7 @@ function DashboardPage() {
   // Extraemos el usuario desde el contexto
   const { user } = useAuth();
 
-  const modules = MENU_ITEMS.filter((item) => item.path !== "/home");
+  const modules = MENU_ITEMS.filter((item) => item.path !== "/app/home");
 
   return (
     <section className="space-y-6">
