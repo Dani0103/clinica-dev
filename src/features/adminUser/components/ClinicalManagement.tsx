@@ -7,6 +7,7 @@ import {
 } from "react-icons/hi";
 import DataTable from "@/components/common/DataTable";
 import type { Column } from "@/types/tabledata";
+import NewObjectiveModal from "./modal/NewObjectiveModal";
 
 // Definimos la interfaz para los objetivos clínicos
 interface ClinicalObjective {
@@ -22,6 +23,8 @@ const ClinicalManagement = () => {
   const [activeModal, setActiveModal] = useState<"new_obj" | "edit_obj" | null>(
     null,
   );
+
+  const closeModal = () => setActiveModal(null);
 
   // Datos de ejemplo (Mocks)
   const mockObjectives: ClinicalObjective[] = [
@@ -146,7 +149,11 @@ const ClinicalManagement = () => {
         searchPlaceholder="Buscar objetivo..."
       />
 
-      {/* Aquí irán los modales para crear el objetivo y luego sus actividades */}
+      {/* EL MODAL SE RENDERIZA AQUÍ, EN EL PADRE */}
+      <NewObjectiveModal
+        isOpen={activeModal === "new_obj"}
+        onClose={closeModal}
+      />
     </div>
   );
 };

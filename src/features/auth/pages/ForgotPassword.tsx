@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useApi } from "@/hooks/useApi";
-import { API_ENDPOINTS, AppUrls } from "@/api/apiEndpoints";
+import { API_ENDPOINTS, AppUrls } from "@/services/apiEndpoints";
 import { toast } from "react-toastify";
 
 const ForgotPassword: React.FC = () => {

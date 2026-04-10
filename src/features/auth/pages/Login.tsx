@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useApi } from "@/hooks/useApi";
-import { API_ENDPOINTS, AppUrls } from "@/api/apiEndpoints";
+import { API_ENDPOINTS, AppUrls } from "@/services/apiEndpoints";
 import { toast } from "react-toastify"; // 1. Importamos toast
 
 const Login: React.FC = () => {

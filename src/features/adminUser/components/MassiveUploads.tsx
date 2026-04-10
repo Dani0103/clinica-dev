@@ -5,26 +5,42 @@ import {
   HiOutlineCheckCircle,
   HiOutlineExclamationCircle,
 } from "react-icons/hi";
+import { toast } from "react-toastify"; // Asumiendo que usas toastify para alertas más limpias
 
 const MassiveUploads = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-
-  // Referencia para el input de archivos oculto
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Manejador centralizado para validar el archivo
+  // --- VALIDACIÓN ROBUSTA DE ARCHIVOS ---
   const handleFileChange = (selectedFile: File | undefined) => {
-    if (selectedFile) {
-      const fileName = selectedFile.name.toLowerCase();
-      if (fileName.endsWith(".csv") || fileName.endsWith(".xlsx")) {
-        setFile(selectedFile);
-      } else {
-        alert(
-          "Formato no permitido. Por favor sube solo archivos Excel (.xlsx) o CSV (.csv)",
-        );
-      }
+    if (!selectedFile) return;
+
+    const fileName = selectedFile.name.toLowerCase();
+
+    // 1. Lista negra de extensiones peligrosas (prevenir dobles extensiones)
+    const forbiddenPatterns = [".bat", ".exe", ".sh", ".js", ".vbs"];
+    const hasForbiddenPattern = forbiddenPatterns.some((ext) =>
+      fileName.includes(ext),
+    );
+
+    // 2. Validar extensión final permitida
+    const isAllowedExtension =
+      fileName.endsWith(".xlsx") || fileName.endsWith(".csv");
+
+    if (hasForbiddenPattern || !isAllowedExtension) {
+      // Si detectamos algo como .bat.xlsx o una extensión no permitida
+      toast.error(
+        "Archivo no permitido. Se detectó una extensión potencialmente peligrosa o no válida.",
+      );
+
+      // Limpiamos el input por seguridad
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
     }
+
+    // Si pasa todas las pruebas
+    setFile(selectedFile);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -40,14 +56,12 @@ const MassiveUploads = () => {
     handleFileChange(e.dataTransfer.files[0]);
   };
 
-  // Función para disparar el selector de archivos al hacer clic en el contenedor
   const handleContainerClick = () => {
     fileInputRef.current?.click();
   };
 
   return (
-    <div className="w-full h-full flex flex-col gap-4 animate-fade-in">
-      {/* Input oculto para la selección de archivos */}
+    <div className="w-full h-full flex flex-col gap-2 animate-fade-in">
       <input
         type="file"
         ref={fileInputRef}
@@ -56,15 +70,14 @@ const MassiveUploads = () => {
         className="hidden"
       />
 
-      {/* Encabezado e Instrucciones */}
-      <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+      {/* Encabezado */}
+      <div className="flex flex-col sm:flex-row justify-between items-end gap-4">
         <div>
           <h2 className="text-lg font-bold text-clinic-text-base">
             Procesamiento Masivo
           </h2>
           <p className="text-xs text-clinic-text-muted">
-            Actualiza la base de datos de pacientes o agenda citas desde
-            archivos externos.
+            Actualiza la base de datos de pacientes o agenda citas.
           </p>
         </div>
         <button className="flex items-center gap-2 text-clinic-primary text-sm font-bold hover:underline">
@@ -73,7 +86,6 @@ const MassiveUploads = () => {
         </button>
       </div>
 
-      {/* Grid de opciones y Zona de Carga */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-2">
         {/* Lado Izquierdo: Configuración */}
         <div className="lg:col-span-1 space-y-6">
@@ -111,9 +123,9 @@ const MassiveUploads = () => {
               size={20}
             />
             <p className="text-[11px] text-amber-800 leading-relaxed">
-              <strong>Importante:</strong> Asegúrese de que el archivo no
-              contenga filas vacías y que los números de identificación no
-              tengan puntos ni comas.
+              <strong>Seguridad:</strong> El sistema bloquea archivos con
+              múltiples extensiones o scripts ejecutables por integridad de los
+              datos.
             </p>
           </div>
         </div>
@@ -140,16 +152,13 @@ const MassiveUploads = () => {
                   Arrastra tu archivo aquí
                 </p>
                 <p className="text-xs text-clinic-text-muted mt-1">
-                  o haz clic para buscar en tu equipo
-                </p>
-                <p className="text-[10px] text-gray-400 mt-6 uppercase tracking-widest font-bold border-t pt-4 border-gray-200 w-32 text-center">
-                  Excel o CSV
+                  o haz clic para buscar
                 </p>
               </>
             ) : (
               <div
                 className="flex flex-col items-center animate-bounce-in"
-                onClick={(e) => e.stopPropagation()} // Evita abrir el selector al hacer clic en el botón de borrar
+                onClick={(e) => e.stopPropagation()}
               >
                 <HiOutlineCheckCircle
                   size={52}
