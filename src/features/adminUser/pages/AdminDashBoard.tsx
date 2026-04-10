@@ -1,44 +1,23 @@
 import { useState } from "react";
-import {
-  HiOutlineUsers,
-  HiOutlineClipboardList,
-  HiOutlineShieldCheck,
-  HiOutlineUpload,
-} from "react-icons/hi";
-
-// Importamos los componentes
 import UsersManagement from "@/features/adminUser/components/UsersManagement";
-import ClinicalManagement from "@/features/adminUser/components/ClinicalManagement";
-import AuditLogs from "@/features/adminUser/components/AuditLogs";
-import MassiveUploads from "@/features/adminUser/components/MassiveUploads";
+import ClinicalManagement from "../components/ClinicalManagement";
+import AuditLogs from "../components/AuditLogs";
+import MassiveUploads from "../components/MassiveUploads";
+// Importa los demás componentes cuando los tengas listos
+// import ClinicalManagement from "./ClinicalManagement";
+// import AuditLogs from "./AuditLogs";
+// import MassiveUploads from "./MassiveUploads";
 
-const ADMIN_TABS = [
-  {
-    id: "usuarios",
-    label: "Usuarios y Roles",
-    icon: <HiOutlineUsers size={20} />,
-  },
-  {
-    id: "clinica",
-    label: "Gestión Clínica",
-    icon: <HiOutlineClipboardList size={20} />,
-  },
-  {
-    id: "auditoria",
-    label: "Seguridad y Auditoría",
-    icon: <HiOutlineShieldCheck size={20} />,
-  },
-  {
-    id: "masivos",
-    label: "Cargas Masivas",
-    icon: <HiOutlineUpload size={20} />,
-  },
-];
-
-function AdminDashBoard() {
+const AdminDashBoard = () => {
   const [activeTab, setActiveTab] = useState("usuarios");
 
-  // Función auxiliar para renderizar el componente correcto
+  const tabs = [
+    { id: "usuarios", label: "Gestión de Personal" },
+    { id: "clinica", label: "Configuración Clínica" },
+    { id: "auditoria", label: "Auditoría" },
+    { id: "masivos", label: "Cargas Masivas" },
+  ];
+
   const renderActiveTab = () => {
     switch (activeTab) {
       case "usuarios":
@@ -55,42 +34,44 @@ function AdminDashBoard() {
   };
 
   return (
-    <div className=" h-full flex flex-col gap-6">
-      {/* Encabezado */}
+    <div className="space-y-3">
+      {/* Título del Módulo */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-clinic-text-base tracking-tight">
-          Administración del Sistema
+        <h1 className="text-2xl font-bold text-clinic-text-base">
+          Panel Administrativo
         </h1>
-        <p className="text-clinic-text-muted mt-1 text-sm">
-          Gestión centralizada de usuarios, objetivos clínicos, auditoría y
-          cargas masivas.
+        <p className="text-sm text-clinic-text-muted">
+          Configuración global y gestión de usuarios del sistema.
         </p>
       </div>
 
-      {/* Navegación por Pestañas */}
-      <div className="flex overflow-x-auto border-b border-gray-200 hide-scrollbar">
-        {ADMIN_TABS.map((tab) => (
+      {/* --- BARRA DE PESTAÑAS (TABS) --- */}
+      <div className="flex border-b border-gray-200">
+        {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-6 py-3 text-sm font-semibold transition-colors whitespace-nowrap border-b-2 ${
+            className={`px-6 py-3 text-sm font-semibold transition-all relative ${
               activeTab === tab.id
-                ? "border-clinic-primary text-clinic-primary"
-                : "border-transparent text-clinic-text-muted hover:text-clinic-text-base hover:border-gray-300"
+                ? "text-clinic-primary"
+                : "text-gray-500 hover:text-clinic-text-base"
             }`}
           >
-            {tab.icon}
             {tab.label}
+            {/* Línea indicadora activa */}
+            {activeTab === tab.id && (
+              <div className="absolute bottom-0 left-0 w-full h-0.5 bg-clinic-primary animate-fade-in" />
+            )}
           </button>
         ))}
       </div>
 
-      {/* Área de Contenido Dinámico */}
-      <div className="flex-1 bg-clinic-bg-card rounded-clinic-card shadow-clinic-subtle p-6">
+      {/* --- CONTENIDO DINÁMICO --- */}
+      <div className="bg-white rounded-clinic-card shadow-clinic-subtle p-3">
         {renderActiveTab()}
       </div>
     </div>
   );
-}
+};
 
 export default AdminDashBoard;
