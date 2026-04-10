@@ -2,7 +2,7 @@ import { HiOutlineShieldCheck, HiOutlineDownload } from "react-icons/hi";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { toast } from "react-toastify";
-import type { Column } from "@/types/tabledata";
+import type { Column } from "@/types/tableData";
 import DataTable from "@/components/common/DataTable";
 
 interface AuditLogEntry {

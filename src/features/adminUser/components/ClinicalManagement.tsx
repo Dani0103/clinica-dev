@@ -6,7 +6,7 @@ import {
   HiOutlineTrash,
 } from "react-icons/hi";
 import DataTable from "@/components/common/DataTable";
-import type { Column } from "@/types/tabledata";
+import type { Column } from "@/types/tableData";
 import NewObjectiveModal from "./modal/NewObjectiveModal";
 
 // Definimos la interfaz para los objetivos clínicos
@@ -99,7 +99,7 @@ const ClinicalManagement = () => {
     {
       header: "Acciones",
       className: "text-right",
-      accessor: (obj) => (
+      accessor: (_) => (
         <div className="flex justify-end gap-1">
           <button
             className="p-2 text-gray-400 hover:text-clinic-primary hover:bg-clinic-primary/5 rounded-full transition-all"

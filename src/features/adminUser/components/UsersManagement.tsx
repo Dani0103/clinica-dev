@@ -12,7 +12,7 @@ import DataTable from "@/components/common/DataTable";
 import NewUserModal from "@/features/adminUser/components/modal/NewUserModal";
 import RemoveUserModal from "@/features/adminUser/components/modal/RemoveUserModal";
 import EditPermissionsModal from "@/features/adminUser/components/modal/EditPermissionsModal";
-import type { Column } from "@/types/tabledata";
+import type { Column } from "@/types/tableData";
 
 const UsersManagement = () => {
   const [selectedUser, setSelectedUser] = useState<USERINFO | null>(null);

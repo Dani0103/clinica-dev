@@ -1,4 +1,4 @@
-import type { Column } from "@/types/tabledata";
+import type { Column } from "@/types/tableData";
 import React, { useState, useMemo, useEffect } from "react";
 import {
   HiOutlineChevronLeft,
