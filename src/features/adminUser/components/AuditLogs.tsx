@@ -1,15 +1,9 @@
-import { useState } from "react";
-import {
-  HiOutlineShieldCheck,
-  HiOutlineDownload,
-  HiOutlineLockClosed,
-} from "react-icons/hi";
+import { HiOutlineShieldCheck, HiOutlineDownload } from "react-icons/hi";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { toast } from "react-toastify";
 import type { Column } from "@/types/tabledata";
 import DataTable from "@/components/common/DataTable";
-import PasswordPolicyModal from "./modal/PasswordPolicyModal";
 
 interface AuditLogEntry {
   id: number;
@@ -22,8 +16,6 @@ interface AuditLogEntry {
 }
 
 const AuditLogs = () => {
-  const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
-
   const mockLogs: AuditLogEntry[] = [
     {
       id: 1,
