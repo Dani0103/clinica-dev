@@ -1,14 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import UsersManagement from "@/features/adminUser/components/UsersManagement";
 import ClinicalManagement from "../components/ClinicalManagement";
 import AuditLogs from "../components/AuditLogs";
 import MassiveUploads from "../components/MassiveUploads";
+import { API_ENDPOINTS, AppUrls } from "@/services/apiEndpoints";
+import { useApi } from "@/hooks/useApi";
 // Importa los demás componentes cuando los tengas listos
 // import ClinicalManagement from "./ClinicalManagement";
 // import AuditLogs from "./AuditLogs";
 // import MassiveUploads from "./MassiveUploads";
 
 const AdminDashBoard = () => {
+  const [rol, setRol] = useState([]);
+  const [especialidad, setEspecialidad] = useState([]);
+
   const [activeTab, setActiveTab] = useState("usuarios");
 
   const tabs = [
@@ -21,7 +26,7 @@ const AdminDashBoard = () => {
   const renderActiveTab = () => {
     switch (activeTab) {
       case "usuarios":
-        return <UsersManagement />;
+        return <UsersManagement rol={rol} especialidad={especialidad} />;
       case "clinica":
         return <ClinicalManagement />;
       case "auditoria":
@@ -32,6 +37,43 @@ const AdminDashBoard = () => {
         return null;
     }
   };
+
+  const { execute } = useApi();
+
+  const traerRolesYespecialidades = async () => {
+    try {
+      const rolesResponse = await execute(
+        AppUrls.avanzarApi,
+        API_ENDPOINTS.ADMIN.ROLES,
+        {
+          method: "GET",
+        },
+      );
+
+      const especialidadesResponse = await execute(
+        AppUrls.avanzarApi,
+        API_ENDPOINTS.ADMIN.ESPECIALIDADES,
+        {
+          method: "GET",
+        },
+      );
+
+      // Validamos que la respuesta sea exitosa y extraemos únicamente el arreglo 'data'
+      if (rolesResponse?.status === "success") {
+        setRol(rolesResponse.data);
+      }
+
+      if (especialidadesResponse?.status === "success") {
+        setEspecialidad(especialidadesResponse.data);
+      }
+    } catch (error) {
+      console.error("Error al cargar roles y especialidades:", error);
+    }
+  };
+
+  useEffect(() => {
+    traerRolesYespecialidades();
+  }, []);
 
   return (
     <div className="space-y-3">

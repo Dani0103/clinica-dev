@@ -19,6 +19,11 @@ export const API_ENDPOINTS = {
     RESET: 'password/reset',
   },
 
+  ADMIN: {
+    ROLES: 'roles',
+    ESPECIALIDADES: 'especialidades'
+  }
+
 } as const;
 
 // Tipo para obligar a que las rutas salgan de este objeto

@@ -4,17 +4,22 @@ import {
   HiOutlinePlus,
   HiOutlinePencilAlt,
 } from "react-icons/hi";
-import type { USERINFO } from "@/types/AdminUser/UsersManagement";
+import type { OptionItem, USERINFO } from "@/types/AdminUser/UsersManagement";
 import { MOCK_USERS } from "@/config/mocks/mockUsers";
 
 // Componentes
 import DataTable from "@/components/common/DataTable";
-import NewUserModal from "@/features/adminUser/components/modal/NewUserModal";
+import NewUserModal from "@/features/adminUser/components/modal/NewUserModal/Index";
 import RemoveUserModal from "@/features/adminUser/components/modal/RemoveUserModal";
 import EditPermissionsModal from "@/features/adminUser/components/modal/EditPermissionsModal";
 import type { Column } from "@/types/tableData";
 
-const UsersManagement = () => {
+interface Props {
+  rol: OptionItem[];
+  especialidad: OptionItem[];
+}
+
+const UsersManagement = ({ rol, especialidad }: Props) => {
   const [selectedUser, setSelectedUser] = useState<USERINFO | null>(null);
   const [activeModal, setActiveModal] = useState<
     "new" | "edit" | "remove" | null
@@ -115,7 +120,12 @@ const UsersManagement = () => {
       {/* --- USO DEL COMPONENTE GENÉRICO --- */}
       <DataTable data={MOCK_USERS} columns={columns} />
 
-      <NewUserModal isOpen={activeModal === "new"} onClose={closeModal} />
+      <NewUserModal
+        isOpen={activeModal === "new"}
+        onClose={closeModal}
+        rol={rol}
+        especialidad={especialidad}
+      />
       <RemoveUserModal isOpen={activeModal === "remove"} onClose={closeModal} />
       <EditPermissionsModal
         isOpen={activeModal === "edit"}

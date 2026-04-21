@@ -5,3 +5,8 @@ export interface USERINFO {
     especialidad?: string;
     estado: boolean;
 }
+
+export interface OptionItem {
+    id: string | number;
+    nombre: string;
+}
