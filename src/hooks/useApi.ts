@@ -22,7 +22,7 @@ export const useApi = <T = any>() => {
       const customHeaders: HeadersInit = {
         "Content-Type": "application/json",
         "Accept": "application/json",
-        // "Authorization": `Bearer ${localStorage.getItem('token')}`,
+        "Authorization": `Bearer ${localStorage.getItem('token_avanzar')}`,
         ...options?.headers,
       };
 

@@ -1,8 +1,7 @@
-// src/config/menuItems.tsx
 import {
   HiOutlineViewGrid,
-  // HiOutlineUsers,
-  // HiOutlineCalendar,
+  HiOutlineUsers,
+  HiOutlineCalendar,
   HiOutlineCog,
 } from "react-icons/hi";
 
@@ -13,20 +12,20 @@ export const MENU_ITEMS = [
     icon: <HiOutlineViewGrid size={22} />,
     description: "Vista general del sistema",
   },
-  // {
-  //   path: "/pacientes",
-  //   label: "Pacientes",
-  //   icon: <HiOutlineUsers size={22} />,
-  //   description: "Gestión y registro de pacientes",
-  // },
-  // {
-  //   path: "/agenda",
-  //   label: "Agenda y Citas",
-  //   icon: <HiOutlineCalendar size={22} />,
-  //   description: "Calendario y programación",
-  // },
   {
-    path: "/app/admin/usuarios",
+    path: "/app/pacientes",
+    label: "Pacientes",
+    icon: <HiOutlineUsers size={22} />,
+    description: "Gestión de historias clínicas y pacientes",
+  },
+  {
+    path: "/app/agenda",
+    label: "Agenda",
+    icon: <HiOutlineCalendar size={22} />,
+    description: "Citas y terapias programadas",
+  },
+  {
+    path: "/app/admin/",
     label: "Administración",
     icon: <HiOutlineCog size={22} />,
     description: "Configuración de usuarios y roles",

@@ -10,3 +10,8 @@ export interface OptionItem {
     id: string | number;
     nombre: string;
 }
+
+export interface AdminContextType {
+    rol: OptionItem[];
+    especialidad: OptionItem[];
+}

@@ -15,7 +15,7 @@ function MainLayout() {
         <Sidebar />
 
         {/* Vistas */}
-        <main className="flex-1 bg-gray-50 p-6 overflow-auto rounded-xl">
+        <main className="!w-full !h-full flex-1 bg-gray-50 p-6 overflow-auto rounded-xl">
           <Outlet />
         </main>
       </div>

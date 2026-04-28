@@ -1,25 +1,29 @@
 import { useState } from "react";
 import {
+  Outlet,
+  useNavigate,
+  useOutlet,
+  useOutletContext,
+} from "react-router-dom";
+import {
   HiOutlineUserRemove,
   HiOutlinePlus,
   HiOutlinePencilAlt,
 } from "react-icons/hi";
-import type { OptionItem, USERINFO } from "@/types/AdminUser/UsersManagement";
+import type { USERINFO } from "@/types/AdminUser/UsersManagement";
 import { MOCK_USERS } from "@/config/mocks/mockUsers";
 
 // Componentes
 import DataTable from "@/components/common/DataTable";
-import NewUserModal from "@/features/adminUser/components/modal/NewUserModal/Index";
 import RemoveUserModal from "@/features/adminUser/components/modal/RemoveUserModal";
 import EditPermissionsModal from "@/features/adminUser/components/modal/EditPermissionsModal";
 import type { Column } from "@/types/tableData";
 
-interface Props {
-  rol: OptionItem[];
-  especialidad: OptionItem[];
-}
+const UsersManagement = () => {
+  const navigate = useNavigate();
+  const hasChildRoute = useOutlet();
+  const contextFromAdmin = useOutletContext();
 
-const UsersManagement = ({ rol, especialidad }: Props) => {
   const [selectedUser, setSelectedUser] = useState<USERINFO | null>(null);
   const [activeModal, setActiveModal] = useState<
     "new" | "edit" | "remove" | null
@@ -94,6 +98,10 @@ const UsersManagement = ({ rol, especialidad }: Props) => {
     },
   ];
 
+  if (hasChildRoute) {
+    return <Outlet context={contextFromAdmin} />;
+  }
+
   return (
     <div className="w-full h-full flex flex-col gap-3 animate-fade-in">
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -108,11 +116,27 @@ const UsersManagement = ({ rol, especialidad }: Props) => {
             <HiOutlineUserRemove size={16} className="text-red-500" />
             Baja y Reasignación
           </button>
-          <button
+          {/* <button
             onClick={() => setActiveModal("new")}
             className="bg-clinic-primary text-white px-4 py-2 rounded-clinic-inner flex items-center gap-2 font-bold text-sm"
           >
             <HiOutlinePlus size={18} /> Nuevo Usuario
+          </button> */}
+
+          {/* Botón Médico */}
+          <button
+            onClick={() => navigate("nuevo-medico")}
+            className="bg-clinic-primary text-white px-4 py-2 rounded-clinic-inner flex items-center gap-2 font-bold text-sm shadow-md hover:bg-clinic-primary/90 transition-all"
+          >
+            <HiOutlinePlus size={18} /> Nuevo Médico
+          </button>
+
+          {/* Botón Paciente */}
+          <button
+            onClick={() => navigate("nuevo-paciente")}
+            className="bg-white border-2 border-clinic-primary text-clinic-primary px-4 py-2 rounded-clinic-inner flex items-center gap-2 font-bold text-sm hover:bg-clinic-primary/5 transition-all"
+          >
+            <HiOutlinePlus size={18} /> Nuevo Paciente
           </button>
         </div>
       </div>
@@ -120,12 +144,6 @@ const UsersManagement = ({ rol, especialidad }: Props) => {
       {/* --- USO DEL COMPONENTE GENÉRICO --- */}
       <DataTable data={MOCK_USERS} columns={columns} />
 
-      <NewUserModal
-        isOpen={activeModal === "new"}
-        onClose={closeModal}
-        rol={rol}
-        especialidad={especialidad}
-      />
       <RemoveUserModal isOpen={activeModal === "remove"} onClose={closeModal} />
       <EditPermissionsModal
         isOpen={activeModal === "edit"}
