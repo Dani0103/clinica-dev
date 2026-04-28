@@ -13,6 +13,7 @@ interface User {
   correo: string;
   rol_id: number;
   activo: boolean;
+  especialidad_id?: number;
 }
 
 // Definimos los tipos para el contexto

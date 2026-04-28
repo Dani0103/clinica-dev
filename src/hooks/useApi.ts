@@ -36,6 +36,17 @@ export const useApi = <T = any>() => {
         body: options?.body ? JSON.stringify(options.body) : undefined,
       });
 
+      if (response.status === 401) {
+        // Limpiamos la sesión
+        localStorage.removeItem("token_avanzar");
+        localStorage.removeItem("user_avanzar");
+        
+        // Redirigimos forzosamente al login (limpia también la memoria de React)
+        window.location.href = "/";
+        
+        throw new Error("Tu sesión ha expirado por seguridad. Ingresa nuevamente.");
+      }
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
         throw new Error(errorData?.message || `Error en la petición: ${response.status}`);

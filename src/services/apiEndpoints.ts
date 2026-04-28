@@ -26,6 +26,12 @@ export const API_ENDPOINTS = {
 
   PACIENTES: {
     CREATE: 'pacientes',
+    LIST: 'pacientes',
+  },
+
+  CLINIC: {
+    OBJETIVOS: 'objetivos',
+    TERAPIAS: 'terapias',
   }
 
 } as const;
