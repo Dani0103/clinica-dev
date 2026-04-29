@@ -15,8 +15,8 @@ export default function ReportsPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredPatients = MOCK_PATIENTS.filter(p => 
-    p.cedula.includes(searchTerm) || 
+  const filteredPatients = MOCK_PATIENTS.filter(p =>
+    p.cedula.includes(searchTerm) ||
     `${p.nombres} ${p.apellidos}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -41,7 +41,7 @@ export default function ReportsPage() {
       toast.warning("Seleccione al menos un paciente para generar el reporte.");
       return;
     }
-    
+
     // Check if any selected patient hasn't completed their hours
     const incomplete = MOCK_PATIENTS.filter(p => selectedPatients.includes(p.id) && p.horasMes < p.horasObjetivo);
     if (incomplete.length > 0) {
@@ -59,7 +59,7 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 lg:p-10 min-h-full bg-clinic-bg-soft font-sans space-y-6">
+    <div className=" min-h-full font-sans space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-clinic-text-base flex items-center gap-2 animate-fade-in">
@@ -91,15 +91,15 @@ export default function ReportsPage() {
         <div className="p-5 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4 bg-gray-50/50">
           <div className="flex items-center gap-2 w-full sm:w-auto relative">
             <HiOutlineSearch className="absolute left-3 text-gray-400" size={18} />
-            <input 
-              type="text" 
-              placeholder="Buscar paciente..." 
+            <input
+              type="text"
+              placeholder="Buscar paciente..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-clinic-inner w-full sm:w-64 focus:border-clinic-primary focus:ring-1 focus:ring-clinic-primary outline-none bg-white transition-all"
             />
           </div>
-          <button 
+          <button
             onClick={handleGeneratePDFs}
             disabled={isGenerating || selectedPatients.length === 0}
             className={`flex items-center gap-2 px-5 py-2 text-white font-bold rounded-clinic-inner transition-all shadow-md text-sm ${isGenerating || selectedPatients.length === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-clinic-primary hover:bg-opacity-90 transform hover:scale-[1.02]'}`}
@@ -118,8 +118,8 @@ export default function ReportsPage() {
             <thead className="bg-gray-50 text-clinic-text-muted text-[11px] uppercase font-bold border-b border-gray-200">
               <tr>
                 <th className="px-6 py-4 w-12">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     className="w-4 h-4 text-clinic-primary rounded border-gray-300 focus:ring-clinic-primary"
                     checked={filteredPatients.length > 0 && selectedPatients.length === filteredPatients.length}
                     onChange={handleSelectAll}
@@ -138,8 +138,8 @@ export default function ReportsPage() {
                 return (
                   <tr key={p.id} className="border-b border-gray-50 hover:bg-gray-50/80 transition-colors">
                     <td className="px-6 py-4">
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         className="w-4 h-4 text-clinic-primary rounded border-gray-300 focus:ring-clinic-primary"
                         checked={selectedPatients.includes(p.id)}
                         onChange={() => handleSelectPatient(p.id)}

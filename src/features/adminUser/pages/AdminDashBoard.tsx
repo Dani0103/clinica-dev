@@ -43,10 +43,10 @@ const AdminDashBoard = () => {
   return (
     <div className="flex flex-col min-h-full w-full gap-4">
       <div>
-        <h1 className="text-2xl font-bold text-clinic-text-base">
+        <h1 className="text-2xl sm:text-3xl font-bold text-clinic-text-base flex items-center gap-2 animate-fade-in">
           Panel Administrativo
         </h1>
-        <p className="text-sm text-clinic-text-muted">
+        <p className="text-sm sm:text-base text-clinic-text-muted mt-1 animate-fade-in">
           Configuración global y gestión de usuarios.
         </p>
       </div>
@@ -58,10 +58,9 @@ const AdminDashBoard = () => {
             key={tab.path}
             to={tab.path}
             className={({ isActive }) =>
-              `px-6 py-3 text-sm font-semibold transition-all relative ${
-                isActive
-                  ? "text-clinic-primary"
-                  : "text-gray-500 hover:text-clinic-text-base"
+              `px-6 py-3 text-sm font-semibold transition-all relative ${isActive
+                ? "text-clinic-primary"
+                : "text-gray-500 hover:text-clinic-text-base"
               }`
             }
           >

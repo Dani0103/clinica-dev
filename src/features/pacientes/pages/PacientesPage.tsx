@@ -32,7 +32,6 @@ export default function PacientesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
   const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null);
-  console.log("🚀 ~ PacientesPage ~ selectedPaciente:", selectedPaciente)
   const [isSearching, setIsSearching] = useState(false);
 
   // Terapias state
@@ -88,7 +87,6 @@ export default function PacientesPage() {
   const terapiasDelPaciente = selectedPaciente
     ? historialTerapias.filter(t => t.paciente_id === selectedPaciente.id)
     : [];
-  console.log("🚀 ~ PacientesPage ~ terapiasDelPaciente:", terapiasDelPaciente)
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -141,7 +139,7 @@ export default function PacientesPage() {
   };
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 lg:p-10 min-h-full bg-clinic-bg-soft font-sans space-y-4 sm:space-y-6">
+    <div className=" min-h-full font-sans space-y-4 sm:space-y-6">
 
       {/* Header y Buscador */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">

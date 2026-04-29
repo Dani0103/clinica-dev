@@ -12,10 +12,10 @@ function DashboardPage() {
     <section className="space-y-6">
       {/* Encabezado Personalizado */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl sm:text-3xl font-bold text-clinic-text-base flex items-center gap-2 animate-fade-in">
           ¡Bienvenid@, {user?.nombre || "Usuario"}! 👋
         </h1>
-        <p className="text-sm text-gray-500">
+        <p className="ttext-sm sm:text-base text-clinic-text-muted mt-1 animate-fade-in">
           Resumen general de la información para {user?.correo}
         </p>
       </div>
