@@ -19,14 +19,14 @@ interface Paciente {
   created_at?: string;
 }
 
-interface HistorialTerapia {
-  id: number;
-  fecha: string;
-  objetivo: string;
-  actividad: string;
-  especialidad: string;
-  profesional: string;
-}
+// interface HistorialTerapia {
+//   id: number;
+//   fecha: string;
+//   objetivo: string;
+//   actividad: string;
+//   especialidad: string;
+//   profesional: string;
+// }
 
 export default function PacientesPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -40,7 +40,7 @@ export default function PacientesPage() {
 
   const searchTimeout = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { execute, isLoading } = useApi();
+  const { execute } = useApi();
 
   useEffect(() => {
     fetchPacientes();

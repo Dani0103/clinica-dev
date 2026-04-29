@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useApi } from "@/hooks/useApi";
-import { API_ENDPOINTS, AppUrls } from "@/services/apiEndpoints";
+import { AppUrls } from "@/services/apiEndpoints";
 import { toast } from "react-toastify";
 import { useAuth } from "@/context/AuthContext";
 
@@ -31,14 +31,14 @@ interface NewTerapiaModalProps {
 export default function NewTerapiaModal({ isOpen, onClose, paciente, onSuccess }: NewTerapiaModalProps) {
   const { user } = useAuth();
   const { execute, isLoading } = useApi();
-  
+
   const [objetivos, setObjetivos] = useState<Objetivo[]>([]);
   const [step, setStep] = useState(1);
-  
+
   // Selecciones del usuario
   const [selectedObjetivoId, setSelectedObjetivoId] = useState<number | "">("");
   const [selectedActividadId, setSelectedActividadId] = useState<number | "">("");
-  
+
   // Resultados: key es respuesta_id
   const [resultados, setResultados] = useState<Record<number, { marcado: boolean; notas_libres: string }>>({});
   const [firma, setFirma] = useState("");
@@ -77,7 +77,7 @@ export default function NewTerapiaModal({ isOpen, onClose, paciente, onSuccess }
         toast.warning("Debes seleccionar un objetivo y una actividad.");
         return;
       }
-      
+
       const hasResults = Object.values(resultados).some(r => r.marcado || r.notas_libres);
       if (!hasResults) {
         toast.warning("Debes marcar al menos un resultado o añadir notas.");
@@ -141,7 +141,7 @@ export default function NewTerapiaModal({ isOpen, onClose, paciente, onSuccess }
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-fade-in backdrop-blur-sm">
       <div className="bg-white w-full max-w-3xl rounded-clinic-card shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        
+
         {/* ENCABEZADO */}
         <div className="p-5 border-b border-gray-100 bg-gray-50 flex justify-between items-center shrink-0">
           <div>
@@ -159,7 +159,7 @@ export default function NewTerapiaModal({ isOpen, onClose, paciente, onSuccess }
 
         {/* CONTENIDO SCROLL */}
         <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
-          
+
           {/* STEP INDICATOR */}
           <div className="flex items-center mb-8 justify-center">
             <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold ${step >= 1 ? 'bg-clinic-primary text-white' : 'bg-gray-200 text-gray-500'}`}>1</div>
@@ -172,7 +172,7 @@ export default function NewTerapiaModal({ isOpen, onClose, paciente, onSuccess }
             <div className="space-y-6 animate-fade-in">
               <div>
                 <label className="block text-sm font-semibold text-clinic-text-base mb-2">1. Seleccione el Objetivo Terapéutico</label>
-                <select 
+                <select
                   className="w-full border border-gray-200 rounded-clinic-inner p-3 text-sm focus:border-clinic-primary outline-none bg-white"
                   value={selectedObjetivoId}
                   onChange={(e) => {
@@ -217,8 +217,8 @@ export default function NewTerapiaModal({ isOpen, onClose, paciente, onSuccess }
                       {currentActividad.respuestas.map(resp => (
                         <div key={resp.id} className="border border-gray-100 p-4 rounded-clinic-inner bg-gray-50/50 hover:bg-gray-50 transition-colors">
                           <div className="flex items-start gap-3 mb-3">
-                            <input 
-                              type="checkbox" 
+                            <input
+                              type="checkbox"
                               id={`resp-${resp.id}`}
                               className="mt-1 w-4 h-4 text-clinic-primary rounded border-gray-300 focus:ring-clinic-primary"
                               checked={resultados[resp.id]?.marcado || false}
@@ -228,7 +228,7 @@ export default function NewTerapiaModal({ isOpen, onClose, paciente, onSuccess }
                               {resp.texto_predeterminado}
                             </label>
                           </div>
-                          
+
                           <textarea
                             placeholder="Notas adicionales sobre este resultado (Opcional)"
                             className="w-full text-sm p-3 border border-gray-200 rounded-md focus:border-clinic-primary outline-none min-h-[60px]"
@@ -252,11 +252,11 @@ export default function NewTerapiaModal({ isOpen, onClose, paciente, onSuccess }
               </div>
               <h3 className="text-xl font-bold text-clinic-text-base">Evolución lista para guardar</h3>
               <p className="text-sm text-clinic-text-muted">Por regulaciones clínicas, debe firmar este registro antes de guardarlo en la historia clínica del paciente.</p>
-              
+
               <div className="max-w-md mx-auto text-left mt-6">
                 <label className="block text-sm font-semibold text-clinic-text-base mb-2">Firma Electrónica</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={firma}
                   readOnly
                   className="w-full border border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed rounded-clinic-inner p-3 text-sm focus:outline-none text-center font-bold"
@@ -282,8 +282,8 @@ export default function NewTerapiaModal({ isOpen, onClose, paciente, onSuccess }
               Siguiente
             </button>
           ) : (
-            <button 
-              onClick={handleSubmit} 
+            <button
+              onClick={handleSubmit}
               disabled={isLoading}
               className={`px-6 py-2 text-white text-sm font-bold rounded-clinic-inner transition-colors shadow-sm ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
             >
