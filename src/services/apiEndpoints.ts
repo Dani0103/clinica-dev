@@ -21,7 +21,8 @@ export const API_ENDPOINTS = {
 
   ADMIN: {
     ROLES: 'roles',
-    ESPECIALIDADES: 'especialidades'
+    ESPECIALIDADES: 'especialidades',
+    USERS: 'usuarios'
   },
 
   PACIENTES: {

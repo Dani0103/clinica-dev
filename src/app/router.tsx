@@ -49,7 +49,7 @@ export const router = createBrowserRouter([
           // --- NUEVAS RUTAS DEL SIDEBAR ---
           {
             path: "pacientes",
-            element: <PacientesPage />,
+            element: <PacientesPage />
           },
           {
             path: "agenda",

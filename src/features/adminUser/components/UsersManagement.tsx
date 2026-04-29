@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Outlet,
   useNavigate,
@@ -11,7 +11,8 @@ import {
   HiOutlinePencilAlt,
 } from "react-icons/hi";
 import type { USERINFO } from "@/types/AdminUser/UsersManagement";
-import { MOCK_USERS } from "@/config/mocks/mockUsers";
+import { useApi } from "@/hooks/useApi";
+import { API_ENDPOINTS, AppUrls } from "@/services/apiEndpoints";
 
 // Componentes
 import DataTable from "@/components/common/DataTable";
@@ -28,6 +29,32 @@ const UsersManagement = () => {
   const [activeModal, setActiveModal] = useState<
     "new" | "edit" | "remove" | null
   >(null);
+  
+  const [users, setUsers] = useState<USERINFO[]>([]);
+  const { execute, isLoading } = useApi();
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await execute(AppUrls.avanzarApi, API_ENDPOINTS.ADMIN.USERS, { method: "GET" });
+      if (response && response.data) {
+        // Mapeo defensivo por si el backend aún no retorna la estructura exacta
+        const mappedUsers = response.data.map((u: any) => ({
+          id: u.id,
+          nombre: u.nombres ? `${u.nombres} ${u.apellidos || ''}` : (u.nombre || "Sin Nombre"),
+          rol: u.rol?.nombre || (u.rol_id === 1 ? "ADMIN" : u.rol_id === 2 ? "MÉDICO" : "RECEPCIÓN"),
+          especialidad: u.especialidad?.nombre || (u.especialidad_id ? `Especialidad ID: ${u.especialidad_id}` : ""),
+          estado: u.activo !== undefined ? !!u.activo : true,
+        }));
+        setUsers(mappedUsers);
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
 
   const closeModal = () => {
     setActiveModal(null);
@@ -136,7 +163,13 @@ const UsersManagement = () => {
       </div>
 
       {/* --- USO DEL COMPONENTE GENÉRICO --- */}
-      <DataTable data={MOCK_USERS} columns={columns} />
+      {isLoading ? (
+        <div className="flex justify-center items-center h-48 bg-white rounded-clinic-card border border-gray-100 shadow-sm">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-clinic-primary"></div>
+        </div>
+      ) : (
+        <DataTable data={users} columns={columns} />
+      )}
 
       <RemoveUserModal isOpen={activeModal === "remove"} onClose={closeModal} />
       <EditPermissionsModal

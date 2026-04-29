@@ -134,7 +134,7 @@ export default function NewTerapiaModal({ isOpen, onClose, paciente, onSuccess }
       onSuccess();
       onClose();
     } catch (error) {
-      toast.error("Error al registrar la terapia.");
+      toast.error("Error al registrar la terapia."+ error);
     }
   };
 
