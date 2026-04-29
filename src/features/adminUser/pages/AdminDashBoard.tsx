@@ -41,7 +41,7 @@ const AdminDashBoard = () => {
   }, []);
 
   return (
-    <div className="flex flex-col h-full w-full gap-3 overflow-hidden">
+    <div className="flex flex-col min-h-full w-full gap-4">
       <div>
         <h1 className="text-2xl font-bold text-clinic-text-base">
           Panel Administrativo
@@ -52,7 +52,7 @@ const AdminDashBoard = () => {
       </div>
 
       {/* --- BARRA DE NAVEGACIÓN (TABS) --- */}
-      <div className="flex border-b border-gray-200">
+      <div className="flex border-b border-gray-200 overflow-x-auto whitespace-nowrap custom-scrollbar pb-1">
         {tabs.map((tab) => (
           <NavLink
             key={tab.path}
@@ -78,7 +78,7 @@ const AdminDashBoard = () => {
       </div>
 
       {/* --- CONTENIDO DINÁMICO (Aquí se renderizan los hijos del router) --- */}
-      <div className="w-full h-full bg-white rounded-clinic-card shadow-clinic-subtle p-3">
+      <div className="w-full flex-1 bg-white rounded-clinic-card shadow-clinic-subtle p-3 sm:p-5">
         {/* Pasamos los datos de roles/especialidades vía context o simplemente envolviendo si es necesario */}
         <Outlet context={{ rol, especialidad } satisfies AdminContextType} />
       </div>

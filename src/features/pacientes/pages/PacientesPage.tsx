@@ -14,7 +14,9 @@ interface Paciente {
   edad?: number;
   sexo: string;
   eps: string;
-  ultimoIngreso?: string;
+  // ultimoIngreso?: string;
+  updated_at?: string;
+  created_at?: string;
 }
 
 interface HistorialTerapia {
@@ -30,14 +32,15 @@ export default function PacientesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
   const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null);
+  console.log("🚀 ~ PacientesPage ~ selectedPaciente:", selectedPaciente)
   const [isSearching, setIsSearching] = useState(false);
-  
+
   // Terapias state
   const [historialTerapias, setHistorialTerapias] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const searchTimeout = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-  
+
   const { execute, isLoading } = useApi();
 
   useEffect(() => {
@@ -82,16 +85,17 @@ export default function PacientesPage() {
   };
 
   // Filtramos las terapias reales por el paciente seleccionado
-  const terapiasDelPaciente = selectedPaciente 
+  const terapiasDelPaciente = selectedPaciente
     ? historialTerapias.filter(t => t.paciente_id === selectedPaciente.id)
     : [];
+  console.log("🚀 ~ PacientesPage ~ terapiasDelPaciente:", terapiasDelPaciente)
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchTerm(value);
-    
+
     if (searchTimeout.current) clearTimeout(searchTimeout.current);
-    
+
     if (!value.trim()) {
       setSelectedPaciente(null);
       setIsSearching(false);
@@ -101,11 +105,11 @@ export default function PacientesPage() {
     setIsSearching(true);
     // Agregamos un pequeño delay para mostrar el loader y evitar buscar en cada tecla
     searchTimeout.current = setTimeout(() => {
-      const found = pacientes.find(p => 
-        p.cedula === value || 
+      const found = pacientes.find(p =>
+        p.cedula === value ||
         (p.nombres + " " + p.apellidos).toLowerCase().includes(value.toLowerCase())
       );
-      
+
       if (found) {
         setSelectedPaciente(found);
       } else {
@@ -119,9 +123,26 @@ export default function PacientesPage() {
     e.preventDefault();
   };
 
+  const formatearFecha = (fechaIso?: string) => {
+    if (!fechaIso) return "Reciente";
+
+    const fecha = new Date(fechaIso);
+
+    // Convierte a formato local, ej: "29/04/2026, 12:22:55 a.m."
+    return fecha.toLocaleString("es-CO", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true, // Ponlo en false si prefieres formato militar (24h)
+    });
+  };
+
   return (
     <div className="p-4 sm:p-6 md:p-8 lg:p-10 min-h-full bg-clinic-bg-soft font-sans space-y-4 sm:space-y-6">
-      
+
       {/* Header y Buscador */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="w-full md:w-auto text-center md:text-left">
@@ -152,7 +173,7 @@ export default function PacientesPage() {
         </div>
       ) : selectedPaciente ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 animate-fade-in">
-          
+
           {/* Tarjeta del Paciente (Izquierda) */}
           <div className="bg-clinic-bg-card rounded-clinic-card shadow-clinic-subtle p-5 sm:p-6 lg:col-span-1 h-fit border border-gray-100">
             <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row items-center sm:items-start lg:items-center xl:items-start gap-4 mb-6 text-center sm:text-left lg:text-center xl:text-left">
@@ -164,7 +185,7 @@ export default function PacientesPage() {
                 <p className="text-xs sm:text-sm text-clinic-text-muted">C.C. {selectedPaciente.cedula}</p>
               </div>
             </div>
-            
+
             <div className="space-y-4">
               <div className="flex justify-between border-b border-gray-50 pb-2">
                 <span className="text-clinic-text-muted text-sm">Edad/Sexo</span>
@@ -178,11 +199,11 @@ export default function PacientesPage() {
               </div>
               <div className="flex justify-between items-center border-b border-gray-50 pb-2">
                 <span className="text-clinic-text-muted text-xs sm:text-sm">Último Ingreso</span>
-                <span className="font-medium text-clinic-text-base text-xs sm:text-sm text-right">{selectedPaciente.ultimoIngreso || "Reciente"}</span>
+                <span className="font-medium text-clinic-text-base text-xs sm:text-sm text-right">{formatearFecha(selectedPaciente.updated_at)}</span>
               </div>
             </div>
 
-            <button 
+            <button
               onClick={() => setIsModalOpen(true)}
               className="w-full mt-6 sm:mt-8 bg-gradient-to-r from-clinic-primary to-indigo-600 hover:to-indigo-500 text-white font-semibold py-3 px-4 rounded-clinic-inner shadow-md transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 text-sm sm:text-base">
               <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
@@ -196,43 +217,66 @@ export default function PacientesPage() {
               <svg className="w-5 h-5 text-clinic-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
               Historial de Terapias
             </h3>
-            
+
             <div className="space-y-3 sm:space-y-4 flex-1">
               {terapiasDelPaciente.length > 0 ? (
                 terapiasDelPaciente.map((terapia) => (
                   <div key={terapia.id} className="p-3 sm:p-4 rounded-clinic-inner bg-gray-50 hover:bg-clinic-bg-soft/50 transition-colors border border-gray-100/50 flex flex-col md:flex-row justify-between gap-3 sm:gap-4">
+
+                    {/* Contenido de la Terapia (Izquierda) */}
                     <div className="flex-1">
                       <div className="flex flex-wrap items-center gap-2 mb-1.5 sm:mb-1">
                         <span className="text-[10px] sm:text-xs font-semibold bg-clinic-badge-fisio text-teal-800 px-2 py-0.5 sm:py-1 rounded-md">
-                          {terapia.especialidad?.nombre || "Terapia"}
+                          {/* Fallback en caso de que no venga el objeto especialidad */}
+                          {terapia.especialidad?.nombre || "Terapia Física"}
                         </span>
                         <span className="text-xs sm:text-sm text-clinic-text-muted whitespace-nowrap">
-                          {new Date(terapia.created_at).toLocaleDateString()}
+                          {/* Aplicamos la función para que se vea bonita la fecha */}
+                          {formatearFecha(terapia.created_at)}
                         </span>
                       </div>
+
                       <h4 className="font-semibold text-clinic-text-base text-sm sm:text-base leading-tight">
-                        {terapia.objetivo?.nombre || "Objetivo Clínico"}
+                        {terapia.objetivo?.nombre || "Objetivo no registrado"}
                       </h4>
+
                       <p className="text-xs sm:text-sm text-clinic-text-muted mt-1 leading-snug">
-                        {terapia.actividad?.nombre || "Actividad"}
+                        {/* Como no viene 'actividad', usamos la descripción del objetivo que sí viene en tu JSON */}
+                        {terapia.objetivo?.descripcion || "Sin descripción detallada"}
                       </p>
-                      
+
+                      {/* Resultados (si existen) */}
                       {terapia.resultados && terapia.resultados.length > 0 && (
                         <div className="mt-3 pl-3 border-l-2 border-clinic-primary/20 space-y-1">
                           {terapia.resultados.map((res: any, idx: number) => (
                             <p key={idx} className="text-xs text-gray-500 italic">
-                              • {res.respuesta?.texto_predeterminado}
+                              • {res.respuesta?.texto_predeterminado || "Resultado registrado"}
                               {res.notas_libres && <span> - {res.notas_libres}</span>}
                             </p>
                           ))}
                         </div>
                       )}
                     </div>
+
+                    {/* Información del Profesional y Firma (Derecha) */}
                     <div className="flex md:flex-col items-center md:items-end justify-between md:justify-start mt-2 md:mt-0 pt-2 md:pt-0 border-t md:border-t-0 border-gray-200/60 md:pl-4 text-xs sm:text-sm text-clinic-text-muted shrink-0">
+
                       <span className="flex items-center gap-1 font-medium text-clinic-text-base md:text-clinic-text-muted">
                         <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                        <span className="truncate max-w-[120px] sm:max-w-none">{terapia.medico?.nombre || terapia.firma_electronica || "Médico Tratante"}</span>
+                        <span className="truncate max-w-[120px] sm:max-w-none">
+                          {/* CORREGIDO: Usamos profesional.nombre */}
+                          {terapia.profesional?.nombre || "Profesional Asignado"}
+                        </span>
                       </span>
+
+                      {/* Indicador de Firma Electrónica */}
+                      {terapia.firma_electronica && (
+                        <span className="text-[10px] sm:text-xs text-green-600 mt-1 flex items-center gap-1 font-medium bg-green-50 px-2 py-0.5 rounded-full">
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                          Firmado
+                        </span>
+                      )}
+
                     </div>
                   </div>
                 ))
@@ -265,7 +309,7 @@ export default function PacientesPage() {
       )}
 
       {/* MODAL DE NUEVA TERAPIA */}
-      <NewTerapiaModal 
+      <NewTerapiaModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         paciente={selectedPaciente}

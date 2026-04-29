@@ -8,6 +8,7 @@ import {
 import DataTable from "@/components/common/DataTable";
 import type { Column } from "@/types/tableData";
 import NewObjectiveModal from "./modal/NewObjectiveModal";
+import ActivitiesManager from "./ActivitiesManager";
 
 // Definimos la interfaz para los objetivos clínicos
 interface ClinicalObjective {
@@ -23,6 +24,7 @@ const ClinicalManagement = () => {
   const [activeModal, setActiveModal] = useState<"new_obj" | "edit_obj" | null>(
     null,
   );
+  const [selectedObjective, setSelectedObjective] = useState<ClinicalObjective | null>(null);
 
   const closeModal = () => setActiveModal(null);
 
@@ -99,9 +101,10 @@ const ClinicalManagement = () => {
     {
       header: "Acciones",
       className: "text-right",
-      accessor: (_) => (
+      accessor: (obj) => (
         <div className="flex justify-end gap-1">
           <button
+            onClick={() => setSelectedObjective(obj)}
             className="p-2 text-gray-400 hover:text-clinic-primary hover:bg-clinic-primary/5 rounded-full transition-all"
             title="Gestionar Actividades"
           >
@@ -124,9 +127,18 @@ const ClinicalManagement = () => {
     },
   ];
 
+  if (selectedObjective) {
+    return (
+      <ActivitiesManager
+        objective={selectedObjective}
+        onBack={() => setSelectedObjective(null)}
+      />
+    );
+  }
+
   return (
     <div className="w-full h-full flex flex-col gap-5 animate-fade-in">
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-lg font-bold text-clinic-text-base">
             Estructura Clínica
@@ -137,7 +149,7 @@ const ClinicalManagement = () => {
         </div>
         <button
           onClick={() => setActiveModal("new_obj")}
-          className="flex items-center gap-2 px-4 py-2 bg-clinic-primary text-white rounded-clinic-inner text-sm font-bold hover:bg-opacity-90 transition-all shadow-md"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-clinic-primary text-white rounded-clinic-inner text-sm font-bold hover:bg-opacity-90 transition-all shadow-md"
         >
           <HiOutlinePlus size={18} /> Nuevo Objetivo
         </button>

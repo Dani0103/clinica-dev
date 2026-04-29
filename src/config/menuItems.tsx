@@ -3,6 +3,7 @@ import {
   HiOutlineUsers,
   HiOutlineCalendar,
   HiOutlineCog,
+  HiOutlineDocumentReport,
 } from "react-icons/hi";
 
 export const MENU_ITEMS = [
@@ -23,6 +24,12 @@ export const MENU_ITEMS = [
     label: "Agenda",
     icon: <HiOutlineCalendar size={22} />,
     description: "Citas y terapias programadas",
+  },
+  {
+    path: "/app/reportes",
+    label: "Reportes",
+    icon: <HiOutlineDocumentReport size={22} />,
+    description: "Supervisión y KPIs",
   },
   {
     path: "/app/admin/",

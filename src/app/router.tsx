@@ -18,6 +18,7 @@ import NotFoundPage from "@/features/home/pages/NotFoundPage";
 // import PacientesPage from "@/features/pacientes/pages/PacientesPage";
 // import UsuariosPage from "@/features/admin/pages/UsuariosPage";
 import PacientesPage from "@/features/pacientes/pages/PacientesPage";
+import ReportsPage from "@/features/reports/pages/ReportsPage";
 
 export const router = createBrowserRouter([
   // 1. Ruta Pública: Login
@@ -59,6 +60,10 @@ export const router = createBrowserRouter([
                 </h1>
               </div>
             ),
+          },
+          {
+            path: "reportes",
+            element: <ReportsPage />,
           },
           {
             path: "admin",

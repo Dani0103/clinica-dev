@@ -104,39 +104,33 @@ const UsersManagement = () => {
 
   return (
     <div className="w-full h-full flex flex-col gap-3 animate-fade-in">
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-lg font-bold text-clinic-text-base">
           Gestión de Personal
         </h2>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <button
             onClick={() => setActiveModal("remove")}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-clinic-text-base rounded-clinic-inner text-sm font-semibold hover:bg-gray-50 transition-colors"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-200 text-clinic-text-base rounded-clinic-inner text-sm font-semibold hover:bg-gray-50 transition-colors"
           >
             <HiOutlineUserRemove size={16} className="text-red-500" />
-            Baja y Reasignación
+            <span className="truncate">Baja / Reasignación</span>
           </button>
-          {/* <button
-            onClick={() => setActiveModal("new")}
-            className="bg-clinic-primary text-white px-4 py-2 rounded-clinic-inner flex items-center gap-2 font-bold text-sm"
-          >
-            <HiOutlinePlus size={18} /> Nuevo Usuario
-          </button> */}
 
           {/* Botón Médico */}
           <button
             onClick={() => navigate("nuevo-medico")}
-            className="bg-clinic-primary text-white px-4 py-2 rounded-clinic-inner flex items-center gap-2 font-bold text-sm shadow-md hover:bg-clinic-primary/90 transition-all"
+            className="flex-1 sm:flex-none bg-clinic-primary text-white px-4 py-2 rounded-clinic-inner flex items-center justify-center gap-2 font-bold text-sm shadow-md hover:bg-clinic-primary/90 transition-all"
           >
-            <HiOutlinePlus size={18} /> Nuevo Médico
+            <HiOutlinePlus size={18} /> <span className="truncate">Nuevo Médico</span>
           </button>
 
           {/* Botón Paciente */}
           <button
             onClick={() => navigate("nuevo-paciente")}
-            className="bg-white border-2 border-clinic-primary text-clinic-primary px-4 py-2 rounded-clinic-inner flex items-center gap-2 font-bold text-sm hover:bg-clinic-primary/5 transition-all"
+            className="flex-1 sm:flex-none bg-white border-2 border-clinic-primary text-clinic-primary px-4 py-2 rounded-clinic-inner flex items-center justify-center gap-2 font-bold text-sm hover:bg-clinic-primary/5 transition-all"
           >
-            <HiOutlinePlus size={18} /> Nuevo Paciente
+            <HiOutlinePlus size={18} /> <span className="truncate">Nuevo Paciente</span>
           </button>
         </div>
       </div>

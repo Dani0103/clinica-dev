@@ -9,7 +9,12 @@ import {
 import SidebarItem from "@/components/layout/SideBar/SidebarItem/Index";
 import { MENU_ITEMS } from "@/config/menuItems";
 
-function Sidebar() {
+interface SidebarProps {
+  mobileMenuOpen?: boolean;
+  closeMobileMenu?: () => void;
+}
+
+function Sidebar({ mobileMenuOpen, closeMobileMenu }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -21,11 +26,23 @@ function Sidebar() {
   };
 
   return (
-    <aside
-      className={`${
-        collapsed ? "w-20" : "w-64"
-      } bg-clinic-primary text-white flex flex-col transition-all duration-300 h-full shadow-lg`}
-    >
+    <>
+      {/* Mobile Backdrop */}
+      {mobileMenuOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-black/50 z-40 transition-opacity"
+          onClick={closeMobileMenu}
+        />
+      )}
+
+      <aside
+        className={`
+          ${collapsed ? "w-20" : "w-64"} 
+          bg-clinic-primary text-white flex flex-col transition-all duration-300 h-full shadow-lg
+          fixed md:static inset-y-0 left-0 z-50
+          ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+        `}
+      >
       {/* Navegación Principal (Le agregamos un pt-8 para que no quede pegado arriba ya que quitamos el logo) */}
       <nav className="flex-1 px-3 pt-8 pb-6 space-y-2 overflow-y-auto">
         {MENU_ITEMS.map((item) => (
@@ -69,6 +86,7 @@ function Sidebar() {
         </button>
       </div>
     </aside>
+    </>
   );
 }
 

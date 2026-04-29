@@ -2,17 +2,25 @@ import {
   HiOutlineBell,
   // HiOutlineSearch,
   HiOutlineCog,
+  HiOutlineMenu,
 } from "react-icons/hi";
 import { FiUser } from "react-icons/fi";
-// Si aún necesitas tu logo aquí, puedes importarlo, pero usualmente
-// en este tipo de layouts el logo ya está en la Sidebar (como lo dejamos antes).
-// import { LogoPlaceholderIcon } from "@/assets/icons/LogoPlaceholderIcon";
 
-function Header() {
+interface HeaderProps {
+  onMenuToggle?: () => void;
+}
+
+function Header({ onMenuToggle }: HeaderProps) {
   return (
     <header className="h-20 bg-clinic-bg-card flex justify-between items-center px-4 sm:px-6 lg:px-8 border-b border-gray-100 shadow-sm z-10 sticky">
       {/* Izquierda: Logo de la Clínica */}
       <div className="flex items-center gap-3 flex-1">
+        <button 
+          onClick={onMenuToggle}
+          className="md:hidden p-2 -ml-2 text-clinic-text-base hover:bg-gray-100 rounded-lg"
+        >
+          <HiOutlineMenu size={24} />
+        </button>
         {/* Círculo con la inicial (mantiene el branding del Login) */}
         <div className="bg-clinic-primary w-10 h-10 rounded-full flex items-center justify-center shadow-sm">
           <span className="text-white text-xl font-bold">A</span>
