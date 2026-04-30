@@ -8,8 +8,8 @@ export default {
           /* Estructura y Fondos */
           "bg-soft": "#E6F0FF", // Azul pálido de fondo general de la app
           "bg-card": "#FFFFFF", // Blanco para las tarjetas (Cards) de información
-          primary: "#3E36B0", // Azul/Morado de la Sidebar y parte oscura del degradado
-          "primary-light": "#93C5FD", // Azul claro para la parte brillante del degradado
+          primary: "#00ADCD", // Azul/Morado de la Sidebar y parte oscura del degradado
+          "primary-light": "#4FC1E9", // Azul claro para la parte brillante del degradado
 
           /* Tipografía e Iconos */
           "text-base": "#111827", // Negro/Gris oscuro para nombres y títulos principales

@@ -80,10 +80,10 @@ const EmptyState = ({ msg }: { msg: string }) => (
     {msg}
   </div>
 );
-
 export default function PacienteHistoriaTabs({ pacienteId }: Props) {
   const [active, setActive] = useState<TabKey>("evoluciones");
   const [openModal, setOpenModal] = useState<TabKey | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const terapiaService = useTerapiaService();
   const ingresoService = useHistoriaIngresoService();
@@ -99,11 +99,10 @@ export default function PacienteHistoriaTabs({ pacienteId }: Props) {
   const [consultas, setConsultas] = useState<any[]>([]);
   const [weefims, setWeefims] = useState<any[]>([]);
 
-  const filterByPaciente = <T extends { paciente_id: number }>(items: T[]) =>
-    items.filter((i: any) => Number(i.paciente_id) === Number(pacienteId));
-
   const fetchAll = async () => {
+    setIsLoading(true);
     try {
+      const params = { paciente_id: pacienteId };
       const [
         evRes,
         ingRes,
@@ -112,28 +111,30 @@ export default function PacienteHistoriaTabs({ pacienteId }: Props) {
         cnsRes,
         weeRes,
       ] = await Promise.allSettled([
-        terapiaService.list(),
-        ingresoService.list(),
-        consentService.list(),
-        ordenService.list(),
-        consultaService.list(),
-        weefimService.list(),
+        terapiaService.list(params),
+        ingresoService.list(params),
+        consentService.list(params),
+        ordenService.list(params),
+        consultaService.list(params),
+        weefimService.list(params),
       ]);
 
       if (evRes.status === "fulfilled")
-        setEvoluciones(filterByPaciente(evRes.value?.data ?? []));
+        setEvoluciones(evRes.value?.data ?? []);
       if (ingRes.status === "fulfilled")
-        setIngresos(filterByPaciente(ingRes.value?.data ?? []));
+        setIngresos(ingRes.value?.data ?? []);
       if (consRes.status === "fulfilled")
-        setConsentimientos(filterByPaciente(consRes.value?.data ?? []));
+        setConsentimientos(consRes.value?.data ?? []);
       if (ordRes.status === "fulfilled")
-        setOrdenes(filterByPaciente(ordRes.value?.data ?? []));
+        setOrdenes(ordRes.value?.data ?? []);
       if (cnsRes.status === "fulfilled")
-        setConsultas(filterByPaciente(cnsRes.value?.data ?? []));
+        setConsultas(cnsRes.value?.data ?? []);
       if (weeRes.status === "fulfilled")
-        setWeefims(filterByPaciente(weeRes.value?.data ?? []));
+        setWeefims(weeRes.value?.data ?? []);
     } catch (err: any) {
       toast.error(err?.message || "Error cargando la historia clínica");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -193,27 +194,67 @@ export default function PacienteHistoriaTabs({ pacienteId }: Props) {
       )}
 
       {/* PANELES */}
-      {active === "evoluciones" && (
-        <div className="space-y-3">
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-20">
+          <div className="w-12 h-12 border-4 border-gray-100 border-t-clinic-primary rounded-full animate-spin mb-4"></div>
+          <p className="text-gray-500 font-medium animate-pulse">Obteniendo historial clínico...</p>
+        </div>
+      ) : (
+        <>
+          {active === "evoluciones" && (
+            <div className="space-y-4">
           {evoluciones.length === 0 ? (
             <EmptyState msg="Sin evoluciones registradas." />
           ) : (
             evoluciones.map((t) => (
               <Card key={t.id}>
-                <div className="flex justify-between items-start mb-1">
-                  <span className="text-[10px] font-bold bg-white border border-teal-200 text-teal-700 px-2.5 py-1 rounded-lg uppercase">
-                    {t.especialidad?.nombre || t.objetivo?.nombre || "Terapia"}
-                  </span>
-                  <span className="text-xs text-gray-400">
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-3">
+                  <div className="flex flex-wrap gap-2">
+                    <span className="text-[10px] font-bold bg-white border border-teal-200 text-teal-700 px-2.5 py-1 rounded-lg uppercase shadow-sm">
+                      {t.especialidad?.nombre || "Terapia"}
+                    </span>
+                    {t.profesional && (
+                      <span className="text-[10px] font-bold bg-white border border-blue-200 text-blue-700 px-2.5 py-1 rounded-lg uppercase shadow-sm">
+                        Prof: {t.profesional.nombre}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-xs font-semibold text-gray-400 bg-gray-50 px-2 py-1 rounded-md">
                     {formatDate(t.fecha_hora || t.created_at)}
                   </span>
                 </div>
-                <p className="font-bold text-clinic-text-base">
-                  {t.objetivo?.nombre || "Objetivo"}
-                </p>
-                <p className="text-sm text-clinic-text-muted mt-1">
-                  {t.objetivo?.descripcion || ""}
-                </p>
+                
+                <div className="space-y-2">
+                  <h4 className="font-bold text-clinic-text-base text-lg leading-tight">
+                    {t.objetivo?.nombre || "Sin objetivo definido"}
+                  </h4>
+                  <p className="text-sm text-clinic-text-muted italic border-l-2 border-gray-100 pl-3 py-1">
+                    {t.objetivo?.description || t.objetivo?.descripcion || "Sin descripción disponible."}
+                  </p>
+                </div>
+
+                {t.resultados && t.resultados.length > 0 && (
+                  <div className="mt-4 pt-4 border-t border-gray-50">
+                    <p className="text-[11px] font-bold text-gray-400 uppercase mb-2 tracking-wider">Resultados y Observaciones</p>
+                    <div className="space-y-2">
+                      {t.resultados.map((res: any, idx: number) => (
+                        <div key={res.id || idx} className="bg-white/50 p-2.5 rounded-lg border border-gray-100">
+                          <div className="flex items-center gap-2 mb-1">
+                            <div className={`w-2 h-2 rounded-full ${res.marcado ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                            <span className="text-xs font-bold text-clinic-text-base">
+                              {res.marcado ? 'Objetivo Cumplido' : 'En Proceso'}
+                            </span>
+                          </div>
+                          {res.notas_libres && (
+                            <p className="text-xs text-clinic-text-muted pl-4 italic">
+                              "{res.notas_libres}"
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </Card>
             ))
           )}
@@ -408,6 +449,8 @@ export default function PacienteHistoriaTabs({ pacienteId }: Props) {
           )}
         </div>
       )}
+    </>
+  )}
 
       {/* MODALES */}
       <HistoriaIngresoModal

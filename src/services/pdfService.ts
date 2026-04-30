@@ -1,5 +1,6 @@
 import { useApi } from "@/hooks/useApi";
 import { API_ENDPOINTS, AppUrls } from "@/services/apiEndpoints";
+import JSZip from "jszip";
 
 const triggerDownload = (blob: Blob, fileName: string) => {
   const url = window.URL.createObjectURL(blob);
@@ -17,7 +18,8 @@ export const usePdfService = () => {
 
   const exportarHistoria = async (
     pacienteId: number | string,
-    fileName = `historia_clinica_${pacienteId}.pdf`,
+    fileName?: string,
+    shouldDownload = true
   ) => {
     const blob = (await api.execute(
       AppUrls.avanzarApi,
@@ -25,15 +27,31 @@ export const usePdfService = () => {
       { responseType: "blob" },
     )) as Blob;
 
-    triggerDownload(blob, fileName);
+    if (shouldDownload) {
+      triggerDownload(blob, fileName || `historia_clinica_${pacienteId}.pdf`);
+    }
+    
     return blob;
   };
 
-  const exportarHistoriasMasivo = async (pacientesIds: (number | string)[]) => {
-    const resultados = await Promise.allSettled(
-      pacientesIds.map((id) => exportarHistoria(id)),
-    );
-    return resultados;
+  const exportarHistoriasMasivo = async (pacientes: { id: number | string; nombre: string }[]) => {
+    const zip = new JSZip();
+    
+    const promises = pacientes.map(async (p) => {
+      try {
+        const blob = await exportarHistoria(p.id, "", false);
+        zip.file(`${p.nombre.replace(/\s+/g, '_')}_${p.id}.pdf`, blob);
+      } catch (error) {
+        console.error(`Error al exportar historia de ${p.nombre}:`, error);
+      }
+    });
+
+    await Promise.all(promises);
+    
+    const content = await zip.generateAsync({ type: "blob" });
+    triggerDownload(content, `historias_clinicas_${new Date().getTime()}.zip`);
+    
+    return content;
   };
 
   return { ...api, exportarHistoria, exportarHistoriasMasivo };
