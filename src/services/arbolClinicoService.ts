@@ -4,13 +4,11 @@ import { API_ENDPOINTS, AppUrls } from "@/services/apiEndpoints";
 export interface ObjetivoPayload {
   nombre: string;
   descripcion?: string;
-  rol_id?: number | null;
 }
 
 export interface ActividadPayload {
   objetivo_id: number;
   nombre: string;
-  descripcion?: string;
 }
 
 export interface RespuestaPayload {

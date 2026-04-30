@@ -1,9 +1,11 @@
+import { useEffect, useState } from "react";
 import { HiOutlineShieldCheck, HiOutlineDownload } from "react-icons/hi";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { toast } from "react-toastify";
 import type { Column } from "@/types/tableData";
 import DataTable from "@/components/common/DataTable";
+import { useAuditoriaService } from "@/services";
 
 interface AuditLogEntry {
   id: number;
@@ -15,60 +17,80 @@ interface AuditLogEntry {
   nivel: "INFO" | "WARNING" | "CRITICAL";
 }
 
-const AuditLogs = () => {
-  const mockLogs: AuditLogEntry[] = [
-    {
-      id: 1,
-      usuario: "admin@test.com",
-      accion: "Inicio de sesión exitoso",
-      modulo: "AUTH",
-      fecha: "2026-04-10 08:30:15",
-      ip: "192.168.1.45",
-      nivel: "INFO",
-    },
-    {
-      id: 2,
-      usuario: "dr.mendoza@avanzar.com",
-      accion: "Modificación de Historia Clínica #4502",
-      modulo: "HISTORIAS",
-      fecha: "2026-04-10 09:15:00",
-      ip: "181.45.12.10",
-      nivel: "WARNING",
-    },
-    {
-      id: 3,
-      usuario: "recepcion1@avanzar.com",
-      accion: "Eliminación de cita cancelada",
-      modulo: "AGENDA",
-      fecha: "2026-04-10 09:22:10",
-      ip: "192.168.1.50",
-      nivel: "INFO",
-    },
-    {
-      id: 4,
-      usuario: "desconocido",
-      accion: "Intento fallido de login (3 veces)",
-      modulo: "AUTH",
-      fecha: "2026-04-10 09:45:33",
-      ip: "45.122.10.5",
-      nivel: "CRITICAL",
-    },
-  ];
+const formatFecha = (iso?: string) => {
+  if (!iso) return "—";
+  try {
+    return new Date(iso).toLocaleString("es-CO", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+  } catch {
+    return iso;
+  }
+};
 
-  // --- LÓGICA DE EXPORTACIÓN PDF ---
+const inferNivel = (accion?: string): AuditLogEntry["nivel"] => {
+  const a = (accion || "").toLowerCase();
+  if (a.includes("delete") || a.includes("elimin") || a.includes("fall"))
+    return "CRITICAL";
+  if (a.includes("update") || a.includes("modif")) return "WARNING";
+  return "INFO";
+};
+
+const AuditLogs = () => {
+  const { list, isLoading } = useAuditoriaService();
+  const [logs, setLogs] = useState<AuditLogEntry[]>([]);
+
+  const fetchLogs = async () => {
+    try {
+      const response = await list();
+      const items: any[] = Array.isArray(response?.data)
+        ? response.data
+        : response?.data?.data ?? [];
+
+      const mapped: AuditLogEntry[] = items.map((item: any, idx: number) => ({
+        id: item.id ?? idx,
+        usuario:
+          item.usuario?.nombres || item.usuario?.nombre || item.usuario?.correo || "Sistema",
+        accion:
+          item.accion ||
+          item.evento ||
+          item.descripcion ||
+          item.tipo_cambio ||
+          "Cambio registrado",
+        modulo:
+          item.modulo || item.tabla || item.entidad || item.modelo || "GENERAL",
+        fecha: formatFecha(item.created_at || item.fecha),
+        ip: item.ip || item.direccion_ip || "—",
+        nivel: item.nivel || inferNivel(item.accion || item.tipo_cambio),
+      }));
+
+      setLogs(mapped);
+    } catch (err: any) {
+      toast.error(err?.message || "No se pudo cargar la auditoría");
+    }
+  };
+
+  useEffect(() => {
+    fetchLogs();
+  }, []);
+
   const exportToPDF = () => {
     try {
       const doc = new jsPDF();
 
-      // Título del PDF
       doc.setFontSize(18);
       doc.text("Avanzar IPS - Log de Auditoría", 14, 22);
       doc.setFontSize(10);
       doc.setTextColor(100);
       doc.text(`Fecha de reporte: ${new Date().toLocaleString()}`, 14, 30);
 
-      // Preparar los datos para la tabla
-      const tableRows = mockLogs.map((log) => [
+      const tableRows = logs.map((log) => [
         log.fecha,
         log.usuario,
         log.accion,
@@ -82,12 +104,12 @@ const AuditLogs = () => {
         body: tableRows,
         startY: 35,
         styles: { fontSize: 8 },
-        headStyles: { fillColor: [43, 108, 176] }, // Color corporativo
+        headStyles: { fillColor: [43, 108, 176] },
       });
 
       doc.save(`auditoria_avanzar_${Date.now()}.pdf`);
       toast.success("PDF generado correctamente");
-    } catch (error) {
+    } catch {
       toast.error("Error al generar el PDF");
     }
   };
@@ -141,18 +163,25 @@ const AuditLogs = () => {
         <div className="flex gap-2 w-full sm:w-auto">
           <button
             onClick={exportToPDF}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-200 text-clinic-text-base rounded-clinic-inner text-sm font-semibold hover:bg-gray-50 transition-colors"
+            disabled={!logs.length}
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-200 text-clinic-text-base rounded-clinic-inner text-sm font-semibold hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
             <HiOutlineDownload size={18} /> Exportar PDF
           </button>
         </div>
       </div>
 
-      <DataTable
-        data={mockLogs}
-        columns={columns}
-        searchPlaceholder="Buscar..."
-      />
+      {isLoading && logs.length === 0 ? (
+        <div className="flex justify-center items-center h-40 bg-white rounded-clinic-card border border-gray-100 shadow-sm">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-clinic-primary"></div>
+        </div>
+      ) : (
+        <DataTable
+          data={logs}
+          columns={columns}
+          searchPlaceholder="Buscar..."
+        />
+      )}
     </div>
   );
 };

@@ -1,100 +1,100 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   HiOutlineClipboardList,
   HiOutlinePlus,
-  HiOutlinePencilAlt,
   HiOutlineTrash,
 } from "react-icons/hi";
+import { toast } from "react-toastify";
 import DataTable from "@/components/common/DataTable";
 import type { Column } from "@/types/tableData";
 import NewObjectiveModal from "./modal/NewObjectiveModal";
 import ActivitiesManager from "./ActivitiesManager";
+import { useObjetivoService } from "@/services";
 
-// Definimos la interfaz para los objetivos clínicos
-interface ClinicalObjective {
+export interface RespuestaApi {
+  id: number;
+  texto_predeterminado: string;
+}
+
+export interface ActividadApi {
   id: number;
   nombre: string;
-  descripcion: string;
-  rol_asignado: "MÉDICO" | "RECEPCIÓN" | "ADMIN";
-  total_actividades: number;
-  estado: boolean;
+  respuestas?: RespuestaApi[];
+}
+
+export interface ObjetivoApi {
+  id: number;
+  nombre: string;
+  descripcion?: string;
+  actividades?: ActividadApi[];
 }
 
 const ClinicalManagement = () => {
-  const [activeModal, setActiveModal] = useState<"new_obj" | "edit_obj" | null>(
-    null,
-  );
-  const [selectedObjective, setSelectedObjective] = useState<ClinicalObjective | null>(null);
+  const { list, remove, isLoading } = useObjetivoService();
+
+  const [objetivos, setObjetivos] = useState<ObjetivoApi[]>([]);
+  const [activeModal, setActiveModal] = useState<"new_obj" | null>(null);
+  const [selectedObjective, setSelectedObjective] =
+    useState<ObjetivoApi | null>(null);
+
+  const fetchObjetivos = async () => {
+    try {
+      const response = await list();
+      if (response?.data) {
+        setObjetivos(response.data);
+        if (selectedObjective) {
+          const refreshed = response.data.find(
+            (o: ObjetivoApi) => o.id === selectedObjective.id,
+          );
+          if (refreshed) setSelectedObjective(refreshed);
+        }
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "No se pudieron cargar los objetivos");
+    }
+  };
+
+  useEffect(() => {
+    fetchObjetivos();
+  }, []);
 
   const closeModal = () => setActiveModal(null);
 
-  // Datos de ejemplo (Mocks)
-  const mockObjectives: ClinicalObjective[] = [
-    {
-      id: 1,
-      nombre: "Ingreso de Paciente",
-      descripcion: "Proceso inicial de recepción",
-      rol_asignado: "RECEPCIÓN",
-      total_actividades: 5,
-      estado: true,
-    },
-    {
-      id: 2,
-      nombre: "Consulta General",
-      descripcion: "Valoración médica estándar",
-      rol_asignado: "MÉDICO",
-      total_actividades: 12,
-      estado: true,
-    },
-    {
-      id: 3,
-      nombre: "Seguimiento Especializado",
-      descripcion: "Control de pacientes crónicos",
-      rol_asignado: "MÉDICO",
-      total_actividades: 8,
-      estado: false,
-    },
-  ];
+  const handleDelete = async (obj: ObjetivoApi) => {
+    if (
+      !window.confirm(
+        `¿Eliminar el objetivo "${obj.nombre}"? Esta acción no se puede deshacer.`,
+      )
+    ) {
+      return;
+    }
 
-  const columns: Column<ClinicalObjective>[] = [
+    try {
+      await remove(obj.id);
+      toast.success("Objetivo eliminado");
+      fetchObjetivos();
+    } catch (err: any) {
+      toast.error(err?.message || "No se pudo eliminar el objetivo");
+    }
+  };
+
+  const columns: Column<ObjetivoApi>[] = [
     {
       header: "Objetivo Clínico",
       accessor: (obj) => (
         <div>
           <p className="font-bold text-clinic-text-base">{obj.nombre}</p>
-          <p className="text-xs text-clinic-text-muted">{obj.descripcion}</p>
+          <p className="text-xs text-clinic-text-muted">
+            {obj.descripcion || "Sin descripción"}
+          </p>
         </div>
-      ),
-    },
-    {
-      header: "Rol Responsable",
-      accessor: (obj) => (
-        <span
-          className={`px-2 py-1 rounded-full text-[10px] font-bold ${
-            obj.rol_asignado === "MÉDICO"
-              ? "bg-blue-100 text-blue-700"
-              : "bg-orange-100 text-orange-700"
-          }`}
-        >
-          {obj.rol_asignado}
-        </span>
       ),
     },
     {
       header: "Actividades",
       accessor: (obj) => (
         <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-medium">
-          {obj.total_actividades} tareas
-        </span>
-      ),
-    },
-    {
-      header: "Estado",
-      accessor: (obj) => (
-        <span
-          className={`text-xs font-bold ${obj.estado ? "text-green-500" : "text-red-400"}`}
-        >
-          {obj.estado ? "Publicado" : "Borrador"}
+          {obj.actividades?.length ?? 0} tareas
         </span>
       ),
     },
@@ -111,12 +111,7 @@ const ClinicalManagement = () => {
             <HiOutlineClipboardList size={18} />
           </button>
           <button
-            className="p-2 text-gray-400 hover:text-clinic-primary hover:bg-clinic-primary/5 rounded-full transition-all"
-            title="Editar"
-          >
-            <HiOutlinePencilAlt size={18} />
-          </button>
-          <button
+            onClick={() => handleDelete(obj)}
             className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all"
             title="Eliminar"
           >
@@ -132,6 +127,7 @@ const ClinicalManagement = () => {
       <ActivitiesManager
         objective={selectedObjective}
         onBack={() => setSelectedObjective(null)}
+        onTreeChange={fetchObjetivos}
       />
     );
   }
@@ -155,16 +151,22 @@ const ClinicalManagement = () => {
         </button>
       </div>
 
-      <DataTable
-        data={mockObjectives}
-        columns={columns}
-        searchPlaceholder="Buscar objetivo..."
-      />
+      {isLoading && objetivos.length === 0 ? (
+        <div className="flex justify-center items-center h-40 bg-white rounded-clinic-card border border-gray-100 shadow-sm">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-clinic-primary"></div>
+        </div>
+      ) : (
+        <DataTable
+          data={objetivos}
+          columns={columns}
+          searchPlaceholder="Buscar objetivo..."
+        />
+      )}
 
-      {/* EL MODAL SE RENDERIZA AQUÍ, EN EL PADRE */}
       <NewObjectiveModal
         isOpen={activeModal === "new_obj"}
         onClose={closeModal}
+        onSuccess={fetchObjetivos}
       />
     </div>
   );

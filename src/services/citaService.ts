@@ -3,10 +3,10 @@ import { API_ENDPOINTS, AppUrls } from "@/services/apiEndpoints";
 
 export interface NewCitaPayload {
   paciente_id: number;
-  profesional_id: number;
+  medico_id: number;
+  especialidad_id: number;
+  /** ISO 8601 string. Debe ser una fecha futura (validado en backend con `after:now`). */
   programada_para: string;
-  motivo?: string;
-  duracion_minutos?: number;
 }
 
 export const useCitaService = () => {

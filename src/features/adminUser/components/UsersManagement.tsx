@@ -10,11 +10,10 @@ import {
   HiOutlinePlus,
   HiOutlinePencilAlt,
 } from "react-icons/hi";
+import { toast } from "react-toastify";
 import type { USERINFO } from "@/types/AdminUser/UsersManagement";
-import { useApi } from "@/hooks/useApi";
-import { API_ENDPOINTS, AppUrls } from "@/services/apiEndpoints";
+import { useUserService } from "@/services";
 
-// Componentes
 import DataTable from "@/components/common/DataTable";
 import RemoveUserModal from "@/features/adminUser/components/modal/RemoveUserModal";
 import EditPermissionsModal from "@/features/adminUser/components/modal/EditPermissionsModal";
@@ -29,39 +28,59 @@ const UsersManagement = () => {
   const [activeModal, setActiveModal] = useState<
     "new" | "edit" | "remove" | null
   >(null);
-  
-  const [users, setUsers] = useState<USERINFO[]>([]);
-  const { execute, isLoading } = useApi();
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  const [users, setUsers] = useState<USERINFO[]>([]);
+  const { list, activar, desactivar, isLoading } = useUserService();
 
   const fetchUsers = async () => {
     try {
-      const response = await execute(AppUrls.avanzarApi, API_ENDPOINTS.ADMIN.USERS, { method: "GET" });
+      const response = await list();
       if (response && response.data) {
-        // Mapeo defensivo por si el backend aún no retorna la estructura exacta
-        const mappedUsers = response.data.map((u: any) => ({
+        const mappedUsers: USERINFO[] = response.data.map((u: any) => ({
           id: u.id,
-          nombre: u.nombres ? `${u.nombres} ${u.apellidos || ''}` : (u.nombre || "Sin Nombre"),
-          rol: u.rol?.nombre || (u.rol_id === 1 ? "ADMIN" : u.rol_id === 2 ? "MÉDICO" : "RECEPCIÓN"),
-          especialidad: u.especialidad?.nombre || (u.especialidad_id ? `Especialidad ID: ${u.especialidad_id}` : ""),
+          nombre: u.nombres
+            ? `${u.nombres} ${u.apellidos || ""}`.trim()
+            : u.nombre || "Sin Nombre",
+          rol:
+            u.rol?.nombre ||
+            (u.rol_id === 1 ? "ADMIN" : u.rol_id === 2 ? "MÉDICO" : "RECEPCIÓN"),
+          rol_id: u.rol_id ?? u.rol?.id,
+          especialidad: u.especialidad?.nombre,
+          especialidad_id: u.especialidad_id ?? u.especialidad?.id,
+          correo: u.correo,
           estado: u.activo !== undefined ? !!u.activo : true,
         }));
         setUsers(mappedUsers);
       }
-    } catch (error) {
-      console.error("Error fetching users:", error);
+    } catch (error: any) {
+      toast.error(error?.message || "Error al cargar los usuarios");
     }
   };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const closeModal = () => {
     setActiveModal(null);
     setSelectedUser(null);
   };
 
-  // --- DEFINICIÓN DE COLUMNAS ---
+  const handleToggleActivo = async (user: USERINFO) => {
+    try {
+      if (user.estado) {
+        await desactivar(user.id);
+        toast.success(`Usuario ${user.nombre} desactivado`);
+      } else {
+        await activar(user.id);
+        toast.success(`Usuario ${user.nombre} activado`);
+      }
+      fetchUsers();
+    } catch (error: any) {
+      toast.error(error?.message || "No se pudo actualizar el estado");
+    }
+  };
+
   const columns: Column<USERINFO>[] = [
     {
       header: "Profesional / Usuario",
@@ -72,13 +91,12 @@ const UsersManagement = () => {
       header: "Rol",
       accessor: (user) => (
         <span
-          className={`px-2 py-1 rounded-full text-[10px] font-bold ${
-            user.rol === "MÉDICO"
-              ? "bg-blue-100 text-blue-700"
-              : user.rol === "ADMIN"
-                ? "bg-purple-100 text-purple-700"
-                : "bg-orange-100 text-orange-700"
-          }`}
+          className={`px-2 py-1 rounded-full text-[10px] font-bold ${user.rol === "MÉDICO"
+            ? "bg-blue-100 text-blue-700"
+            : user.rol === "ADMIN"
+              ? "bg-purple-100 text-purple-700"
+              : "bg-orange-100 text-orange-700"
+            }`}
         >
           {user.rol} {user.especialidad && `(${user.especialidad})`}
         </span>
@@ -87,21 +105,26 @@ const UsersManagement = () => {
     {
       header: "Estado",
       accessor: (user) => (
-        <span
-          className={`flex items-center gap-1 text-xs font-semibold ${user.estado ? "text-green-600" : "text-red-500"}`}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleToggleActivo(user);
+          }}
+          className={`flex items-center gap-1 text-xs font-semibold transition-opacity hover:opacity-70 ${user.estado ? "text-green-600" : "text-red-500"}`}
+          title={user.estado ? "Click para desactivar" : "Click para activar"}
         >
           <div
             className={`w-1.5 h-1.5 rounded-full ${user.estado ? "bg-green-500" : "bg-red-500"}`}
           />
           {user.estado ? "Activo" : "Inactivo"}
-        </span>
+        </button>
       ),
     },
     {
-      header: "Último Acceso",
-      accessor: () => (
-        <span className="text-xs italic text-clinic-text-muted">
-          Hoy, 08:30 AM
+      header: "Correo",
+      accessor: (user) => (
+        <span className="text-xs text-clinic-text-muted">
+          {user.correo || "—"}
         </span>
       ),
     },
@@ -112,7 +135,7 @@ const UsersManagement = () => {
         <div className="flex justify-end">
           <button
             onClick={(e) => {
-              e.stopPropagation(); // Evita el click en la fila
+              e.stopPropagation();
               setSelectedUser(user);
               setActiveModal("edit");
             }}
@@ -126,7 +149,7 @@ const UsersManagement = () => {
   ];
 
   if (hasChildRoute) {
-    return <Outlet context={contextFromAdmin} />;
+    return <Outlet context={{ ...(contextFromAdmin as any), onUserCreated: fetchUsers }} />;
   }
 
   return (
@@ -144,7 +167,6 @@ const UsersManagement = () => {
             <span className="truncate">Baja / Reasignación</span>
           </button>
 
-          {/* Botón Médico */}
           <button
             onClick={() => navigate("nuevo-medico")}
             className="flex-1 sm:flex-none bg-clinic-primary text-white px-4 py-2 rounded-clinic-inner flex items-center justify-center gap-2 font-bold text-sm shadow-md hover:bg-clinic-primary/90 transition-all"
@@ -152,7 +174,6 @@ const UsersManagement = () => {
             <HiOutlinePlus size={18} /> <span className="truncate">Nuevo Médico</span>
           </button>
 
-          {/* Botón Paciente */}
           <button
             onClick={() => navigate("nuevo-paciente")}
             className="flex-1 sm:flex-none bg-white border-2 border-clinic-primary text-clinic-primary px-4 py-2 rounded-clinic-inner flex items-center justify-center gap-2 font-bold text-sm hover:bg-clinic-primary/5 transition-all"
@@ -162,7 +183,6 @@ const UsersManagement = () => {
         </div>
       </div>
 
-      {/* --- USO DEL COMPONENTE GENÉRICO --- */}
       {isLoading ? (
         <div className="flex justify-center items-center h-48 bg-white rounded-clinic-card border border-gray-100 shadow-sm">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-clinic-primary"></div>
@@ -171,11 +191,23 @@ const UsersManagement = () => {
         <DataTable data={users} columns={columns} />
       )}
 
-      <RemoveUserModal isOpen={activeModal === "remove"} onClose={closeModal} />
+      <RemoveUserModal
+        isOpen={activeModal === "remove"}
+        users={users}
+        onClose={closeModal}
+        onSuccess={() => {
+          fetchUsers();
+          closeModal();
+        }}
+      />
       <EditPermissionsModal
         isOpen={activeModal === "edit"}
         onClose={closeModal}
         user={selectedUser}
+        onSuccess={() => {
+          fetchUsers();
+          closeModal();
+        }}
       />
     </div>
   );

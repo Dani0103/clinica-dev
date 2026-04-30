@@ -19,6 +19,7 @@ import NotFoundPage from "@/features/home/pages/NotFoundPage";
 // import UsuariosPage from "@/features/admin/pages/UsuariosPage";
 import PacientesPage from "@/features/pacientes/pages/PacientesPage";
 import ReportsPage from "@/features/reports/pages/ReportsPage";
+import AgendaPage from "@/features/agenda/pages/AgendaPage";
 
 export const router = createBrowserRouter([
   // 1. Ruta Pública: Login
@@ -53,13 +54,7 @@ export const router = createBrowserRouter([
           },
           {
             path: "agenda",
-            element: (
-              <div className="p-8 flex items-center justify-center h-full">
-                <h1 className="text-2xl font-bold text-clinic-text-base bg-white p-6 rounded-clinic-card shadow-clinic-subtle">
-                  Agenda y Citas (En construcción 📅)
-                </h1>
-              </div>
-            ),
+            element: <AgendaPage />,
           },
           {
             path: "reportes",

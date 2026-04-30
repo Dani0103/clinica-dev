@@ -1,8 +1,11 @@
 export interface USERINFO {
     id: number;
     nombre: string;
-    rol: "MÉDICO" | "ADMIN" | "RECEPCIÓN";
+    rol: "MÉDICO" | "ADMIN" | "RECEPCIÓN" | string;
+    rol_id?: number;
     especialidad?: string;
+    especialidad_id?: number;
+    correo?: string;
     estado: boolean;
 }
 
