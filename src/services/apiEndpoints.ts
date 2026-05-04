@@ -22,6 +22,14 @@ export const API_ENDPOINTS = {
     USERS: "usuarios",
   },
 
+  ESPECIALIDADES: {
+    LIST: "especialidades",
+    CREATE: "especialidades",
+    SHOW: (id: number | string) => `especialidades/${id}`,
+    UPDATE: (id: number | string) => `especialidades/${id}`,
+    DELETE: (id: number | string) => `especialidades/${id}`,
+  },
+
   USERS: {
     LIST: "usuarios",
     CREATE: "usuarios",
@@ -39,10 +47,14 @@ export const API_ENDPOINTS = {
     SHOW: (id: number | string) => `pacientes/${id}`,
     DELETE: (id: number | string) => `pacientes/${id}`,
     EXPORTAR_HISTORIA: (id: number | string) => `pacientes/${id}/exportar-historia`,
+    PLANTILLA_EXCEL: "pacientes/plantilla-excel",
+    IMPORTAR_EXCEL: "pacientes/importar-excel",
   },
 
   CITAS: {
+    LIST: "citas",
     CREATE: "citas",
+    BATCH: "citas/batch",
   },
 
   CLINIC: {
@@ -106,6 +118,12 @@ export const API_ENDPOINTS = {
 
   AUDITORIA: {
     LIST: "auditoria",
+  },
+
+  CARGAS_MASIVAS: {
+    LIST: "cargas-masivas",
+    CITAS_PLANTILLA: "cargas-masivas/citas/plantilla",
+    USUARIOS_PLANTILLA: "cargas-masivas/usuarios/plantilla",
   },
 } as const;
 

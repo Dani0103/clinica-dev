@@ -41,5 +41,19 @@ export const usePacienteService = () => {
       method: "DELETE",
     });
 
-  return { ...api, list, show, create, remove };
+  const descargarPlantilla = () =>
+    api.execute(AppUrls.avanzarApi, API_ENDPOINTS.PACIENTES.PLANTILLA_EXCEL, {
+      responseType: "blob",
+    });
+
+  const importarPacientes = (file: File) => {
+    const formData = new FormData();
+    formData.append("archivo", file);
+    return api.execute(AppUrls.avanzarApi, API_ENDPOINTS.PACIENTES.IMPORTAR_EXCEL, {
+      method: "POST",
+      body: formData,
+    });
+  };
+
+  return { ...api, list, show, create, remove, descargarPlantilla, importarPacientes };
 };

@@ -12,6 +12,7 @@ import {
   usePacienteService,
   useUserService,
 } from "@/services";
+import type { CitaDeApi } from "@/services/citaService";
 
 interface PacienteLite {
   id: number;
@@ -31,14 +32,6 @@ interface MedicoLite {
 interface EspecialidadLite {
   id: number;
   nombre: string;
-}
-
-interface CitaLocal {
-  id: string;
-  paciente: PacienteLite;
-  medico: MedicoLite;
-  especialidad: EspecialidadLite | null;
-  programada_para: string;
 }
 
 const formatDateTime = (iso: string) => {
@@ -70,6 +63,9 @@ const minDateTimeLocal = () => {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
 
+const nombreMedico = (medico: CitaDeApi["medico"]) =>
+  `${medico.nombres} ${medico.apellidos}`.trim();
+
 export default function AgendaPage() {
   const pacienteService = usePacienteService();
   const userService = useUserService();
@@ -78,6 +74,8 @@ export default function AgendaPage() {
   const [pacientes, setPacientes] = useState<PacienteLite[]>([]);
   const [medicos, setMedicos] = useState<MedicoLite[]>([]);
   const [especialidades, setEspecialidades] = useState<EspecialidadLite[]>([]);
+  const [citas, setCitas] = useState<CitaDeApi[]>([]);
+  const [loadingCitas, setLoadingCitas] = useState(false);
 
   const [docSearch, setDocSearch] = useState("");
   const [selectedPaciente, setSelectedPaciente] = useState<PacienteLite | null>(null);
@@ -85,7 +83,17 @@ export default function AgendaPage() {
   const [especialidadId, setEspecialidadId] = useState<number | "">("");
   const [programadaPara, setProgramadaPara] = useState<string>("");
 
-  const [citasCreadas, setCitasCreadas] = useState<CitaLocal[]>([]);
+  const fetchCitas = async () => {
+    setLoadingCitas(true);
+    try {
+      const res = await citaService.list();
+      if (res?.data) setCitas(res.data);
+    } catch (err: any) {
+      toast.error(err?.message || "No se pudo cargar el listado de citas");
+    } finally {
+      setLoadingCitas(false);
+    }
+  };
 
   const fetchInitial = async () => {
     try {
@@ -126,6 +134,7 @@ export default function AgendaPage() {
 
   useEffect(() => {
     fetchInitial();
+    fetchCitas();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -183,29 +192,16 @@ export default function AgendaPage() {
     }
 
     try {
-      const response = await citaService.create({
+      await citaService.create({
         paciente_id: selectedPaciente.id,
         medico_id: Number(medicoId),
         especialidad_id: Number(especialidadId),
         programada_para: isoDate,
       });
 
-      const medico = medicos.find((m) => m.id === Number(medicoId)) ?? {
-        id: Number(medicoId),
-        nombre: "Médico",
-      };
-      const esp = especialidades.find((e) => e.id === Number(especialidadId)) ?? null;
-
-      const local: CitaLocal = {
-        id: response?.data?.id ? String(response.data.id) : crypto.randomUUID(),
-        paciente: selectedPaciente,
-        medico,
-        especialidad: esp,
-        programada_para: isoDate,
-      };
-      setCitasCreadas((prev) => [local, ...prev]);
       toast.success("Cita agendada correctamente");
       resetForm();
+      fetchCitas();
     } catch (err: any) {
       if (err.errors) {
         Object.values(err.errors).forEach((messages: any) =>
@@ -390,25 +386,30 @@ export default function AgendaPage() {
           </div>
         </form>
 
-        {/* PANEL: citas creadas en esta sesión */}
+        {/* PANEL: listado de citas */}
         <aside className="lg:col-span-2 bg-white rounded-clinic-card shadow-clinic-subtle border border-gray-100 p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-bold text-clinic-text-base">
-              Citas agendadas (sesión actual)
+              Citas registradas
             </h3>
             <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-bold uppercase">
-              {citasCreadas.length}
+              {citas.length}
             </span>
           </div>
 
-          {citasCreadas.length === 0 ? (
+          {loadingCitas ? (
+            <div className="py-12 flex flex-col items-center gap-3 text-clinic-text-muted">
+              <div className="animate-spin rounded-full h-7 w-7 border-4 border-gray-100 border-t-clinic-primary" />
+              <p className="text-sm">Cargando citas...</p>
+            </div>
+          ) : citas.length === 0 ? (
             <div className="text-center py-12 text-clinic-text-muted text-sm">
               <HiOutlineCalendar size={36} className="mx-auto mb-3 text-gray-300" />
-              Aún no has agendado citas en esta sesión.
+              No hay citas registradas.
             </div>
           ) : (
-            <ul className="space-y-3">
-              {citasCreadas.map((c) => (
+            <ul className="space-y-3 max-h-[480px] overflow-y-auto pr-1">
+              {citas.map((c) => (
                 <li
                   key={c.id}
                   className="p-4 border border-gray-100 bg-gray-50/50 rounded-clinic-inner"
@@ -423,20 +424,13 @@ export default function AgendaPage() {
                     </span>
                   </p>
                   <p className="text-xs text-clinic-text-muted mt-1">
-                    {c.medico.nombre}
+                    {nombreMedico(c.medico)}
                     {c.especialidad ? ` · ${c.especialidad.nombre}` : ""}
                   </p>
                 </li>
               ))}
             </ul>
           )}
-
-          <p className="mt-6 text-[10px] text-clinic-text-muted leading-relaxed border-t border-gray-100 pt-3">
-            ℹ La API aún no expone <code className="bg-gray-100 px-1 rounded">GET /citas</code>; este
-            panel sólo refleja las citas creadas durante la sesión actual. Cuando
-            esté el endpoint, basta con cambiar este listado por la respuesta del
-            servicio.
-          </p>
         </aside>
       </div>
     </section>

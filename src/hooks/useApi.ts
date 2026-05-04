@@ -44,9 +44,11 @@ export const useApi = <T = any>() => {
       try {
         const token = localStorage.getItem("token_avanzar");
 
+        const isFormData = options?.body instanceof FormData;
+
         const customHeaders: HeadersInit = {
           Accept: "application/json",
-          ...(options?.responseType !== "blob" && { "Content-Type": "application/json" }),
+          ...(!isFormData && options?.responseType !== "blob" && { "Content-Type": "application/json" }),
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
           ...options?.headers,
         };
@@ -56,7 +58,7 @@ export const useApi = <T = any>() => {
         const response = await fetch(fullUrl, {
           method: options?.method || "GET",
           headers: customHeaders,
-          body: options?.body ? JSON.stringify(options.body) : undefined,
+          body: options?.body ? (isFormData ? options.body : JSON.stringify(options.body)) : undefined,
         });
 
         if (response.status === 401) {
