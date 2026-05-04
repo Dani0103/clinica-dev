@@ -1,12 +1,15 @@
 import { MENU_ITEMS } from "@/config/menuItems";
-import { useAuth } from "@/context/AuthContext"; // Importa tu hook
+import { useAuth } from "@/context/AuthContext";
 import { Link } from "react-router-dom";
 
 function DashboardPage() {
-  // Extraemos el usuario desde el contexto
-  const { user } = useAuth();
+  const { user, hasPermiso } = useAuth();
 
-  const modules = MENU_ITEMS.filter((item) => item.path !== "/app/home");
+  const modules = MENU_ITEMS.filter(
+    (item) =>
+      item.path !== "/app/home" &&
+      (!item.permiso || item.permiso.length === 0 ? true : hasPermiso(item.permiso)),
+  );
 
   return (
     <section className="space-y-6">

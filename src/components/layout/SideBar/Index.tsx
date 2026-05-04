@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -16,8 +16,18 @@ interface SidebarProps {
 
 function Sidebar({ mobileMenuOpen, closeMobileMenu }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
-  const { logout } = useAuth();
+  const { logout, hasPermiso } = useAuth();
   const navigate = useNavigate();
+
+  const visibleItems = useMemo(
+    () =>
+      MENU_ITEMS.filter((item) =>
+        !item.permiso || item.permiso.length === 0
+          ? true
+          : hasPermiso(item.permiso),
+      ),
+    [hasPermiso],
+  );
 
   // Función para cerrar sesión de forma segura
   const handleLogout = () => {
@@ -45,7 +55,7 @@ function Sidebar({ mobileMenuOpen, closeMobileMenu }: SidebarProps) {
       >
         {/* Navegación Principal (Le agregamos un pt-8 para que no quede pegado arriba ya que quitamos el logo) */}
         <nav className="flex-1 px-3 pt-8 pb-6 space-y-2 overflow-y-auto">
-          {MENU_ITEMS.map((item) => (
+          {visibleItems.map((item) => (
             <SidebarItem
               key={item.path}
               to={item.path}

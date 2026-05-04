@@ -12,3 +12,4 @@ export * from "./dashboardService";
 export * from "./auditoriaService";
 export * from "./pdfService";
 export * from "./cargasMasivasService";
+export * from "./especialidadService";

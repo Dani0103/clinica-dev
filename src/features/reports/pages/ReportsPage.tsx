@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { HiOutlineDownload, HiOutlineDocumentReport, HiOutlineSearch } from "react-icons/hi";
 import { toast } from "react-toastify";
 import { usePacienteService, usePdfService, useDashboardService } from "@/services";
+import PageLoader from "@/components/common/PageLoader";
 import type { DashboardMetrics } from "@/services/dashboardService";
 
 interface Paciente {
@@ -290,12 +291,9 @@ export default function ReportsPage() {
             </thead>
             <tbody>
               {isLoadingPacientes ? (
-                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center">
-                    <div className="flex flex-col items-center justify-center">
-                      <div className="w-10 h-10 border-4 border-gray-100 border-t-clinic-primary rounded-full animate-spin mb-3"></div>
-                      <p className="text-sm font-medium text-gray-500">Cargando pacientes...</p>
-                    </div>
+                <tr>
+                  <td colSpan={7} className="px-6 py-4">
+                    <PageLoader variant="inline" text="Cargando pacientes..." />
                   </td>
                 </tr>
               ) : (

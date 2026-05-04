@@ -5,6 +5,7 @@ import autoTable from "jspdf-autotable";
 import { toast } from "react-toastify";
 import type { Column } from "@/types/tableData";
 import DataTable from "@/components/common/DataTable";
+import PageLoader from "@/components/common/PageLoader";
 import { useAuditoriaService } from "@/services";
 
 interface AuditLogEntry {
@@ -172,9 +173,7 @@ const AuditLogs = () => {
       </div>
 
       {isLoading && logs.length === 0 ? (
-        <div className="flex justify-center items-center h-40 bg-white rounded-clinic-card border border-gray-100 shadow-sm">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-clinic-primary"></div>
-        </div>
+        <PageLoader variant="section" />
       ) : (
         <DataTable
           data={logs}

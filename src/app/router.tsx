@@ -10,6 +10,7 @@ import UsersManagement from "@/features/adminUser/components/UsersManagement";
 import ClinicalManagement from "@/features/adminUser/components/ClinicalManagement";
 import AuditLogs from "@/features/adminUser/components/AuditLogs";
 import CargasMasivasPage from "@/features/adminUser/pages/CargasMasivasPage";
+import EspecialidadesManagement from "@/features/adminUser/components/EspecialidadesManagement";
 import NewDoctorModal from "@/features/adminUser/components/modal/NewUserModal/modal/NewDoctorModal";
 import NewPatientModal from "@/features/adminUser/components/modal/NewUserModal/modal/NewPatientModal";
 import NotFoundPage from "@/features/home/pages/NotFoundPage";
@@ -77,6 +78,7 @@ export const router = createBrowserRouter([
               { path: "nuevo-paciente", element: <NewPatientModal /> },
               { path: "clinica", element: <ClinicalManagement /> },
               { path: "auditoria", element: <AuditLogs /> },
+              { path: "especialidades", element: <EspecialidadesManagement /> },
               { path: "masivos", element: <CargasMasivasPage /> },
             ],
           },

@@ -13,6 +13,7 @@ import {
   useUserService,
 } from "@/services";
 import type { CitaDeApi } from "@/services/citaService";
+import PageLoader from "@/components/common/PageLoader";
 
 interface PacienteLite {
   id: number;
@@ -398,10 +399,7 @@ export default function AgendaPage() {
           </div>
 
           {loadingCitas ? (
-            <div className="py-12 flex flex-col items-center gap-3 text-clinic-text-muted">
-              <div className="animate-spin rounded-full h-7 w-7 border-4 border-gray-100 border-t-clinic-primary" />
-              <p className="text-sm">Cargando citas...</p>
-            </div>
+            <PageLoader variant="inline" text="Cargando citas..." />
           ) : citas.length === 0 ? (
             <div className="text-center py-12 text-clinic-text-muted text-sm">
               <HiOutlineCalendar size={36} className="mx-auto mb-3 text-gray-300" />

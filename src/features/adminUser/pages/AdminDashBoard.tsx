@@ -15,6 +15,7 @@ const AdminDashBoard = () => {
   const tabs = [
     { path: "usuarios", label: "Gestión de Personal" },
     { path: "clinica", label: "Configuración Clínica" },
+    { path: "especialidades", label: "Especialidades" },
     { path: "auditoria", label: "Auditoría" },
     { path: "masivos", label: "Cargas Masivas" },
   ];

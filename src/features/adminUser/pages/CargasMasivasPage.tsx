@@ -6,6 +6,7 @@ import DataTable from "@/components/common/DataTable";
 import type { Column } from "@/types/tableData";
 import ImportarPacientesModal from "../components/ImportarPacientesModal";
 import { HiOutlineDownload, HiOutlineUpload } from "react-icons/hi";
+import PageLoader from "@/components/common/PageLoader";
 
 interface CargaMasiva {
   id: number;
@@ -120,10 +121,7 @@ export default function CargasMasivasPage() {
       </div>
 
       {isLoading && catalogo.length === 0 ? (
-        <div className="py-20 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-4 border-gray-100 border-t-clinic-primary mx-auto mb-4"></div>
-          <p className="text-gray-500 font-medium">Cargando catálogo...</p>
-        </div>
+        <PageLoader variant="page" text="Cargando catálogo..." />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {catalogo.map((item) => {

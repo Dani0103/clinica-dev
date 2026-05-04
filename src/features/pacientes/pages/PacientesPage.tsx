@@ -3,6 +3,7 @@ import { HiOutlineSearch } from "react-icons/hi";
 import { toast } from "react-toastify";
 import { usePacienteService } from "@/services";
 import DataTable from "@/components/common/DataTable";
+import PageLoader from "@/components/common/PageLoader";
 import type { Column } from "@/types/tableData";
 import NewTerapiaModal from "../components/NewTerapiaModal";
 import PacienteHistoriaTabs from "../components/tabs/PacienteHistoriaTabs";
@@ -141,10 +142,7 @@ export default function PacientesPage() {
       </div>
 
       {isLoading && pacientes.length === 0 ? (
-        <div className="py-20 text-center bg-white rounded-2xl border border-gray-100 shadow-sm">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-100 border-t-clinic-primary mx-auto mb-4"></div>
-          <p className="text-gray-500 font-medium">Sincronizando con el servidor...</p>
-        </div>
+        <PageLoader variant="page" text="Sincronizando con el servidor..." />
       ) : selectedPaciente ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 h-fit sticky top-6">

@@ -6,6 +6,7 @@ import {
 } from "react-icons/hi";
 import { toast } from "react-toastify";
 import DataTable from "@/components/common/DataTable";
+import PageLoader from "@/components/common/PageLoader";
 import type { Column } from "@/types/tableData";
 import NewObjectiveModal from "./modal/NewObjectiveModal";
 import ActivitiesManager from "./ActivitiesManager";
@@ -152,9 +153,7 @@ const ClinicalManagement = () => {
       </div>
 
       {isLoading && objetivos.length === 0 ? (
-        <div className="flex justify-center items-center h-40 bg-white rounded-clinic-card border border-gray-100 shadow-sm">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-clinic-primary"></div>
-        </div>
+        <PageLoader variant="section" />
       ) : (
         <DataTable
           data={objetivos}

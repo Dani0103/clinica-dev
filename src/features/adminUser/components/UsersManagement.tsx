@@ -15,6 +15,7 @@ import type { USERINFO } from "@/types/AdminUser/UsersManagement";
 import { useUserService } from "@/services";
 
 import DataTable from "@/components/common/DataTable";
+import PageLoader from "@/components/common/PageLoader";
 import RemoveUserModal from "@/features/adminUser/components/modal/RemoveUserModal";
 import EditPermissionsModal from "@/features/adminUser/components/modal/EditPermissionsModal";
 import type { Column } from "@/types/tableData";
@@ -184,9 +185,7 @@ const UsersManagement = () => {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center items-center h-48 bg-white rounded-clinic-card border border-gray-100 shadow-sm">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-clinic-primary"></div>
-        </div>
+        <PageLoader variant="section" />
       ) : (
         <DataTable data={users} columns={columns} />
       )}
