@@ -27,9 +27,8 @@ const defaultIconColor = { bg: "bg-gray-50", text: "text-gray-600" };
 
 export default function CargasMasivasPage() {
   const [catalogo, setCatalogo] = useState<TipoCargaMasiva[]>([]);
-  const [cargas, setCargas] = useState<CargaMasiva[]>([]);
+  const [cargas] = useState<CargaMasiva[]>([]);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [importandoKey, setImportandoKey] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const { getCatalogo, descargarPlantillaPorRuta, isLoading } = useCargasMasivasService();
@@ -66,7 +65,6 @@ export default function CargasMasivasPage() {
 
   const handleImportar = (key: string) => {
     if (key === "pacientes") {
-      setImportandoKey(key);
       setIsImportModalOpen(true);
     }
   };
@@ -188,10 +186,7 @@ export default function CargasMasivasPage() {
 
       <ImportarPacientesModal
         isOpen={isImportModalOpen}
-        onClose={() => {
-          setIsImportModalOpen(false);
-          setImportandoKey(null);
-        }}
+        onClose={() => setIsImportModalOpen(false)}
         onSuccess={() => setRefreshKey((k) => k + 1)}
       />
     </div>
