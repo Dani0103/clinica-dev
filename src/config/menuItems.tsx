@@ -5,6 +5,7 @@ import {
   HiOutlineCog,
   HiOutlineDocumentReport,
   HiOutlineDocumentDownload,
+  HiOutlineUpload,
 } from "react-icons/hi";
 
 export interface MenuItem {
@@ -56,10 +57,20 @@ export const MENU_ITEMS: MenuItem[] = [
     permiso: ["datos.exportar", "historial.ver"],
   },
   {
+    path: "/app/cargas-masivas",
+    label: "Carga masiva",
+    icon: <HiOutlineUpload size={22} />,
+    description: "Importar pacientes y datos vía Excel",
+    permiso: ["pacientes.carga_masiva"],
+  },
+  {
     path: "/app/admin/",
     label: "Administración",
     icon: <HiOutlineCog size={22} />,
     description: "Configuración de usuarios y roles",
+    // IMPORTANTE: solo permisos exclusivos de admin/coordinador. NO incluir
+    // pacientes.carga_masiva (lo tiene Recepcionista — la entrada propia
+    // arriba ya cubre ese caso).
     permiso: [
       "usuarios.ver",
       "usuarios.crear",
@@ -68,7 +79,6 @@ export const MENU_ITEMS: MenuItem[] = [
       "objetivos.gestionar",
       "especialidades.gestionar",
       "auditoria.ver",
-      "pacientes.carga_masiva",
       "usuarios.reset_password",
     ],
   },

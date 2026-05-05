@@ -13,6 +13,7 @@ import {
 import { toast } from "react-toastify";
 import type { USERINFO } from "@/types/AdminUser/UsersManagement";
 import { useUserService } from "@/services";
+import { rolDisplayName } from "@/utils/roles";
 
 import DataTable from "@/components/common/DataTable";
 import PageLoader from "@/components/common/PageLoader";
@@ -42,14 +43,19 @@ const UsersManagement = () => {
           nombre: u.nombres
             ? `${u.nombres} ${u.apellidos || ""}`.trim()
             : u.nombre || "Sin Nombre",
-          rol:
-            u.rol?.nombre ||
-            (u.rol_id === 1 ? "ADMIN" : u.rol_id === 2 ? "MÉDICO" : "RECEPCIÓN"),
+          // Leer SIEMPRE del backend (rol.nombre). Si por alguna razón no llega,
+          // mostramos un placeholder neutro en vez de inventar el rol por id.
+          rol: rolDisplayName(u.rol?.nombre),
           rol_id: u.rol_id ?? u.rol?.id,
           especialidad: u.especialidad?.nombre,
           especialidad_id: u.especialidad_id ?? u.especialidad?.id,
           correo: u.correo,
-          estado: u.activo !== undefined ? !!u.activo : true,
+          estado:
+            u.esta_activo !== undefined
+              ? !!u.esta_activo
+              : u.activo !== undefined
+                ? !!u.activo
+                : true,
         }));
         setUsers(mappedUsers);
       }
@@ -90,18 +96,20 @@ const UsersManagement = () => {
     },
     {
       header: "Rol",
-      accessor: (user) => (
-        <span
-          className={`px-2 py-1 rounded-full text-[10px] font-bold ${user.rol === "MÉDICO"
-            ? "bg-blue-100 text-blue-700"
-            : user.rol === "ADMIN"
-              ? "bg-purple-100 text-purple-700"
-              : "bg-orange-100 text-orange-700"
-            }`}
-        >
-          {user.rol} {user.especialidad && `(${user.especialidad})`}
-        </span>
-      ),
+      accessor: (user) => {
+        const colorByRol: Record<string, string> = {
+          Administrador: "bg-purple-100 text-purple-700",
+          Médico: "bg-blue-100 text-blue-700",
+          Coordinador: "bg-emerald-100 text-emerald-700",
+          Recepcionista: "bg-orange-100 text-orange-700",
+        };
+        const cls = colorByRol[user.rol] || "bg-gray-100 text-gray-700";
+        return (
+          <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${cls}`}>
+            {user.rol} {user.especialidad && `(${user.especialidad})`}
+          </span>
+        );
+      },
     },
     {
       header: "Estado",

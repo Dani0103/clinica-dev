@@ -15,6 +15,7 @@ import {
 } from "@/services";
 import type { CitaDeApi } from "@/services/citaService";
 import { useAuth } from "@/context/AuthContext";
+import { isMedico } from "@/utils/roles";
 import PageLoader from "@/components/common/PageLoader";
 
 interface PacienteLite {
@@ -82,14 +83,13 @@ export default function AgendaPage() {
   const { user } = useAuth();
 
   /**
-   * El rol "Médico" solo puede agendar para sus pacientes asignados (los que
-   * ya tuvieron al menos una cita con él). Admin/Recepción/Coordinador ven
-   * todos los pacientes.
+   * El rol Médico solo puede agendar para sus pacientes asignados (los que
+   * ya tuvieron al menos una cita con él). Admin/Recepcionista/Coordinador
+   * ven todos los pacientes.
    * NOTA: este filtro es solo de UX. La autorización real debe imponerse en
    * el backend (`StoreCitaRequest@authorize()`).
    */
-  const rolNombre = (user?.rol?.nombre || "").toLowerCase();
-  const esMedico = rolNombre === "médico" || rolNombre === "medico";
+  const esMedico = isMedico(user);
 
   const [pacientes, setPacientes] = useState<PacienteLite[]>([]);
   const [medicos, setMedicos] = useState<MedicoLite[]>([]);

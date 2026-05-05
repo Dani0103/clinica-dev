@@ -6,6 +6,7 @@ import type {
   AdminContextType,
 } from "@/types/AdminUser/UsersManagement";
 import { useUserService } from "@/services";
+import { normalizeRol } from "@/utils/roles";
 
 interface EditPermissionsModalProps {
   isOpen: boolean;
@@ -35,10 +36,10 @@ const EditPermissionsModal: React.FC<EditPermissionsModalProps> = ({
 
   if (!isOpen || !user) return null;
 
-  const selectedRolNombre =
-    ctx?.rol.find((r) => Number(r.id) === Number(rolId))?.nombre?.toUpperCase() ||
-    "";
-  const isMedico = selectedRolNombre.includes("MÉDICO") || selectedRolNombre.includes("MEDICO");
+  const selectedRolNombre = ctx?.rol.find(
+    (r) => Number(r.id) === Number(rolId),
+  )?.nombre;
+  const isMedico = normalizeRol(selectedRolNombre) === "medico";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

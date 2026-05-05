@@ -17,7 +17,6 @@ const AdminDashBoard = () => {
     { path: "clinica", label: "Configuración Clínica" },
     { path: "especialidades", label: "Especialidades" },
     { path: "auditoria", label: "Auditoría" },
-    { path: "masivos", label: "Cargas Masivas" },
   ];
 
   useEffect(() => {

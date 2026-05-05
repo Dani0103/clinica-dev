@@ -67,6 +67,12 @@ export const router = createBrowserRouter([
             element: <HistoriasDescargaPage />,
           },
           {
+            // Ruta directa (fuera de /admin) para que Recepcionista pueda
+            // acceder sin ver el resto del panel administrativo.
+            path: "cargas-masivas",
+            element: <CargasMasivasPage />,
+          },
+          {
             path: "admin",
             element: <AdminDashBoard />,
             children: [
@@ -84,7 +90,6 @@ export const router = createBrowserRouter([
               { path: "clinica", element: <ClinicalManagement /> },
               { path: "auditoria", element: <AuditLogs /> },
               { path: "especialidades", element: <EspecialidadesManagement /> },
-              { path: "masivos", element: <CargasMasivasPage /> },
             ],
           },
         ],
