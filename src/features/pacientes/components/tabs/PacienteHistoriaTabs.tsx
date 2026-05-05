@@ -335,9 +335,9 @@ export default function PacienteHistoriaTabs({ pacienteId }: Props) {
                 <p className="text-sm text-clinic-text-base mt-1 whitespace-pre-line">
                   {o.descripcion}
                 </p>
-                {o.medico?.nombres && (
+                {(o.medico?.nombre || o.medico?.nombres) && (
                   <p className="text-[10px] text-clinic-text-muted mt-2">
-                    Por: {o.medico.nombres} {o.medico.apellidos || ""}
+                    Por: {o.medico.nombre || `${o.medico.nombres ?? ""} ${o.medico.apellidos ?? ""}`.trim()}
                   </p>
                 )}
               </Card>

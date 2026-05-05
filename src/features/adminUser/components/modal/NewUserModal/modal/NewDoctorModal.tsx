@@ -10,7 +10,7 @@ interface DoctorOutletContext extends AdminContextType {
 }
 
 const initialState = {
-  nombres: "",
+  nombre: "",
   apellidos: "",
   cedula: "",
   telefono: "",
@@ -48,7 +48,7 @@ const NewDoctorModal = () => {
     e.preventDefault();
 
     if (
-      !form.nombres ||
+      !form.nombre ||
       !form.apellidos ||
       !form.cedula ||
       !form.correo ||
@@ -61,7 +61,7 @@ const NewDoctorModal = () => {
 
     try {
       await create({
-        nombres: form.nombres,
+        nombre: form.nombre,
         apellidos: form.apellidos,
         cedula: form.cedula,
         telefono: form.telefono || undefined,
@@ -103,8 +103,8 @@ const NewDoctorModal = () => {
               <div className="col-span-2">
                 <input
                   type="text"
-                  name="nombres"
-                  value={form.nombres}
+                  name="nombre"
+                  value={form.nombre}
                   onChange={handleChange}
                   required
                   className="w-full border border-gray-200 rounded-md p-2 text-sm focus:border-clinic-primary outline-none"

@@ -20,6 +20,7 @@ import NotFoundPage from "@/features/home/pages/NotFoundPage";
 // import UsuariosPage from "@/features/admin/pages/UsuariosPage";
 import PacientesPage from "@/features/pacientes/pages/PacientesPage";
 import ReportsPage from "@/features/reports/pages/ReportsPage";
+import HistoriasDescargaPage from "@/features/reports/pages/HistoriasDescargaPage";
 import AgendaPage from "@/features/agenda/pages/AgendaPage";
 
 export const router = createBrowserRouter([
@@ -60,6 +61,10 @@ export const router = createBrowserRouter([
           {
             path: "reportes",
             element: <ReportsPage />,
+          },
+          {
+            path: "historias-descarga",
+            element: <HistoriasDescargaPage />,
           },
           {
             path: "admin",

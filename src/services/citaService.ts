@@ -39,7 +39,17 @@ export interface CitaDeApi {
   created_at: string;
   updated_at: string;
   paciente: { id: number; nombres: string; apellidos: string; cedula: string; eps?: string };
-  medico: { id: number; nombres: string; apellidos: string };
+  /**
+   * El backend serializa `User` con un único campo `nombre` (la tabla `usuarios`
+   * no tiene `nombres`/`apellidos`). Mantenemos ambos como opcionales por
+   * compatibilidad con futuras versiones del Resource.
+   */
+  medico: {
+    id: number;
+    nombre?: string;
+    nombres?: string;
+    apellidos?: string;
+  };
   especialidad: { id: number; nombre: string } | null;
 }
 

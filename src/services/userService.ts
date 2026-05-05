@@ -2,7 +2,7 @@ import { useApi } from "@/hooks/useApi";
 import { API_ENDPOINTS, AppUrls } from "@/services/apiEndpoints";
 
 export interface NewUserPayload {
-  nombres: string;
+  nombre: string;
   apellidos: string;
   cedula: string;
   correo: string;

@@ -5,6 +5,7 @@ import {
   HiOutlineSearch,
   HiOutlineUser,
   HiOutlineUserGroup,
+  HiOutlineLockClosed,
 } from "react-icons/hi";
 import { toast } from "react-toastify";
 import {
@@ -13,6 +14,7 @@ import {
   useUserService,
 } from "@/services";
 import type { CitaDeApi } from "@/services/citaService";
+import { useAuth } from "@/context/AuthContext";
 import PageLoader from "@/components/common/PageLoader";
 
 interface PacienteLite {
@@ -64,13 +66,30 @@ const minDateTimeLocal = () => {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
 
-const nombreMedico = (medico: CitaDeApi["medico"]) =>
-  `${medico.nombres} ${medico.apellidos}`.trim();
+const nombreMedico = (medico: CitaDeApi["medico"] | null | undefined): string => {
+  if (!medico) return "Médico no asignado";
+  // El backend usa `nombre` (único). Caemos a `nombres/apellidos` por si
+  // alguna versión del Resource los expone separados.
+  if (medico.nombre) return medico.nombre.trim();
+  const compuesto = `${medico.nombres ?? ""} ${medico.apellidos ?? ""}`.trim();
+  return compuesto || "Sin nombre";
+};
 
 export default function AgendaPage() {
   const pacienteService = usePacienteService();
   const userService = useUserService();
   const citaService = useCitaService();
+  const { user } = useAuth();
+
+  /**
+   * El rol "Médico" solo puede agendar para sus pacientes asignados (los que
+   * ya tuvieron al menos una cita con él). Admin/Recepción/Coordinador ven
+   * todos los pacientes.
+   * NOTA: este filtro es solo de UX. La autorización real debe imponerse en
+   * el backend (`StoreCitaRequest@authorize()`).
+   */
+  const rolNombre = (user?.rol?.nombre || "").toLowerCase();
+  const esMedico = rolNombre === "médico" || rolNombre === "medico";
 
   const [pacientes, setPacientes] = useState<PacienteLite[]>([]);
   const [medicos, setMedicos] = useState<MedicoLite[]>([]);
@@ -98,36 +117,55 @@ export default function AgendaPage() {
 
   const fetchInitial = async () => {
     try {
-      const [pacRes, medRes, espRes] = await Promise.all([
+      // Si es médico, también traemos sus citas previas para deducir qué
+      // pacientes le están asignados.
+      const [pacRes, medRes, espRes, misCitasRes] = await Promise.all([
         pacienteService.list({ per_page: 100 }),
         userService.medicos(),
         userService.especialidades(),
+        esMedico && user
+          ? citaService.list({ medico_id: user.id })
+          : Promise.resolve(null),
       ]);
 
       const pacRaw: any[] = pacRes?.data ?? [];
-      setPacientes(
-        pacRaw.map((p: any) => ({
-          id: p.id,
-          nombres: p.nombres,
-          apellidos: p.apellidos,
-          cedula: p.cedula,
-          eps: p.eps,
-        })),
-      );
+      let pacList: PacienteLite[] = pacRaw.map((p: any) => ({
+        id: p.id,
+        nombres: p.nombres,
+        apellidos: p.apellidos,
+        cedula: p.cedula,
+        eps: p.eps,
+      }));
+
+      // FILTRO: si es médico, dejar solo pacientes con citas previas con él.
+      if (esMedico && misCitasRes?.data) {
+        const idsAsignados = new Set<number>(
+          (misCitasRes.data as any[]).map((c: any) => c.paciente_id),
+        );
+        pacList = pacList.filter((p) => idsAsignados.has(p.id));
+      }
+      setPacientes(pacList);
 
       const medRaw: any[] = medRes?.data ?? [];
-      setMedicos(
-        medRaw.map((m: any) => ({
-          id: m.id,
-          nombre: m.nombres
-            ? `${m.nombres} ${m.apellidos || ""}`.trim()
-            : m.nombre || "Médico",
-          especialidad_id: m.especialidad_id ?? m.especialidad?.id,
-          especialidad: m.especialidad?.nombre,
-        })),
-      );
+      const medList: MedicoLite[] = medRaw.map((m: any) => ({
+        id: m.id,
+        nombre: m.nombres
+          ? `${m.nombres} ${m.apellidos || ""}`.trim()
+          : m.nombre || "Médico",
+        especialidad_id: m.especialidad_id ?? m.especialidad?.id,
+        especialidad: m.especialidad?.nombre,
+      }));
+
+      // Si es médico, dejar solo su propia ficha en el selector.
+      setMedicos(esMedico && user ? medList.filter((m) => m.id === user.id) : medList);
 
       setEspecialidades(espRes?.data ?? []);
+
+      // Pre-seleccionar médico = self y su especialidad cuando aplica.
+      if (esMedico && user) {
+        setMedicoId(user.id);
+        if (user.especialidad_id) setEspecialidadId(user.especialidad_id);
+      }
     } catch (err: any) {
       toast.error(err?.message || "No se pudo cargar la información de agenda");
     }
@@ -161,9 +199,15 @@ export default function AgendaPage() {
   const resetForm = () => {
     setSelectedPaciente(null);
     setDocSearch("");
-    setMedicoId("");
-    setEspecialidadId("");
     setProgramadaPara("");
+    if (esMedico && user) {
+      // Conservar pre-selección de médico/especialidad (no se puede cambiar).
+      setMedicoId(user.id);
+      if (user.especialidad_id) setEspecialidadId(user.especialidad_id);
+    } else {
+      setMedicoId("");
+      setEspecialidadId("");
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -236,15 +280,36 @@ export default function AgendaPage() {
           <div>
             <label className="block text-xs font-bold text-clinic-text-muted uppercase mb-2 flex items-center gap-2">
               <HiOutlineUser /> Paciente
+              {esMedico && (
+                <span
+                  className="ml-auto text-[10px] font-bold text-clinic-text-muted normal-case"
+                  title="Solo ves los pacientes que ya tienen al menos una cita contigo"
+                >
+                  Tus pacientes asignados ({pacientes.length})
+                </span>
+              )}
             </label>
 
+            {esMedico && pacientes.length === 0 && !selectedPaciente && (
+              <div className="mb-3 p-3 rounded-clinic-inner bg-amber-50 border border-amber-200 text-xs text-amber-800">
+                <p className="font-bold mb-1">No tienes pacientes asignados.</p>
+                <p>
+                  Solicita a Recepción/Admin que registre la cita inicial para asignarte el paciente.
+                </p>
+              </div>
+            )}
+
             {selectedPaciente ? (
-              <div className="flex items-center justify-between gap-3 p-3 border border-clinic-primary/30 bg-clinic-primary-light/10 rounded-clinic-inner">
-                <div>
-                  <p className="font-bold text-clinic-text-base">
+              <div className="flex items-center gap-3 p-3 border border-clinic-primary/30 bg-clinic-primary/5 rounded-clinic-inner">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-clinic-primary/20 to-clinic-primary/5 flex items-center justify-center text-clinic-primary font-bold text-sm shrink-0">
+                  {selectedPaciente.nombres[0]}
+                  {selectedPaciente.apellidos[0]}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-clinic-text-base truncate">
                     {selectedPaciente.nombres} {selectedPaciente.apellidos}
                   </p>
-                  <p className="text-xs text-clinic-text-muted">
+                  <p className="text-xs text-clinic-text-muted truncate">
                     CC {selectedPaciente.cedula}
                     {selectedPaciente.eps ? ` · ${selectedPaciente.eps}` : ""}
                   </p>
@@ -252,27 +317,47 @@ export default function AgendaPage() {
                 <button
                   type="button"
                   onClick={() => setSelectedPaciente(null)}
-                  className="text-xs font-bold text-clinic-primary hover:underline"
+                  className="text-xs font-bold text-clinic-primary hover:bg-clinic-primary/10 px-3 py-1.5 rounded-md transition-colors shrink-0"
                 >
                   Cambiar
                 </button>
               </div>
             ) : (
-              <div className="relative">
-                <HiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input
-                  type="text"
-                  value={docSearch}
-                  onChange={(e) => setDocSearch(e.target.value)}
-                  placeholder="Buscar por documento o nombre..."
-                  className="w-full pl-9 pr-4 py-3 text-sm border border-gray-200 rounded-clinic-inner focus:border-clinic-primary outline-none"
-                />
+              <>
+                {/* Wrapper SOLO para el input + ícono — el dropdown va aparte
+                    para que `top-1/2` del ícono se calcule respecto al input. */}
+                <div className="relative">
+                  <HiOutlineSearch
+                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    size={18}
+                  />
+                  <input
+                    type="text"
+                    value={docSearch}
+                    onChange={(e) => setDocSearch(e.target.value)}
+                    placeholder="Buscar por documento o nombre..."
+                    className="w-full pl-10 pr-4 py-3 text-sm bg-white border border-gray-200 rounded-clinic-inner outline-none transition-all focus:border-clinic-primary focus:ring-2 focus:ring-clinic-primary/15 placeholder:text-gray-400"
+                    autoComplete="off"
+                  />
+                  {docSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setDocSearch("")}
+                      title="Limpiar búsqueda"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-1 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
 
                 {(docSearch || filteredPacientes.length > 0) && (
-                  <ul className="mt-2 max-h-56 overflow-y-auto border border-gray-100 rounded-clinic-inner divide-y divide-gray-50 bg-white shadow-sm">
+                  <ul className="mt-2 max-h-64 overflow-y-auto border border-gray-100 rounded-clinic-inner bg-white shadow-sm divide-y divide-gray-50">
                     {filteredPacientes.length === 0 ? (
-                      <li className="px-3 py-3 text-xs text-clinic-text-muted">
-                        Sin coincidencias.
+                      <li className="px-4 py-6 text-center text-xs text-clinic-text-muted italic">
+                        Sin coincidencias para “{docSearch}”.
                       </li>
                     ) : (
                       filteredPacientes.map((p) => (
@@ -283,18 +368,22 @@ export default function AgendaPage() {
                               setSelectedPaciente(p);
                               setDocSearch("");
                             }}
-                            className="w-full text-left px-3 py-2 text-sm hover:bg-clinic-primary/5 flex items-center justify-between"
+                            className="w-full text-left px-3 py-2.5 text-sm hover:bg-clinic-primary/5 transition-colors flex items-center gap-3"
                           >
-                            <span>
-                              <span className="font-semibold text-clinic-text-base">
+                            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-clinic-primary/15 to-clinic-primary/5 flex items-center justify-center text-clinic-primary font-bold text-xs shrink-0">
+                              {p.nombres[0]}
+                              {p.apellidos[0]}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-clinic-text-base truncate">
                                 {p.nombres} {p.apellidos}
-                              </span>
-                              <span className="text-xs text-clinic-text-muted ml-2">
+                              </p>
+                              <p className="text-[11px] text-clinic-text-muted">
                                 CC {p.cedula}
-                              </span>
-                            </span>
+                              </p>
+                            </div>
                             {p.eps && (
-                              <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full uppercase">
+                              <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full uppercase font-bold shrink-0">
                                 {p.eps}
                               </span>
                             )}
@@ -304,7 +393,7 @@ export default function AgendaPage() {
                     )}
                   </ul>
                 )}
-              </div>
+              </>
             )}
           </div>
 
@@ -313,13 +402,27 @@ export default function AgendaPage() {
             <div>
               <label className="block text-xs font-bold text-clinic-text-muted uppercase mb-2 flex items-center gap-2">
                 <HiOutlineUserGroup /> Médico
+                {esMedico && (
+                  <span
+                    className="ml-auto inline-flex items-center gap-1 text-[10px] font-bold text-clinic-primary bg-clinic-primary/5 px-2 py-0.5 rounded-full normal-case"
+                    title="Solo puedes agendar citas a tu nombre"
+                  >
+                    <HiOutlineLockClosed size={11} />
+                    Tú
+                  </span>
+                )}
               </label>
               <select
                 value={medicoId}
                 onChange={(e) =>
                   setMedicoId(e.target.value ? Number(e.target.value) : "")
                 }
-                className="w-full p-3 text-sm border border-gray-200 rounded-clinic-inner focus:border-clinic-primary outline-none bg-white"
+                disabled={esMedico}
+                className={`w-full p-3 text-sm border border-gray-200 rounded-clinic-inner focus:border-clinic-primary outline-none transition-colors ${
+                  esMedico
+                    ? "bg-gray-50 text-clinic-text-base cursor-not-allowed"
+                    : "bg-white"
+                }`}
               >
                 <option value="">Selecciona médico...</option>
                 {medicos.map((m) => (

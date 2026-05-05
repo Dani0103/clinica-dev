@@ -29,8 +29,9 @@ interface NewTerapiaModalProps {
 }
 
 export default function NewTerapiaModal({ isOpen, onClose, paciente, onSuccess }: NewTerapiaModalProps) {
-  const { user } = useAuth();
+  const { user, hasPermiso } = useAuth();
   const { execute, isLoading } = useApi();
+  const puedeRetroactivo = hasPermiso("terapias.retroactivo");
 
   const [objetivos, setObjetivos] = useState<Objetivo[]>([]);
   const [step, setStep] = useState(1);
@@ -42,6 +43,7 @@ export default function NewTerapiaModal({ isOpen, onClose, paciente, onSuccess }
   // Resultados: key es respuesta_id
   const [resultados, setResultados] = useState<Record<number, { marcado: boolean; notas_libres: string }>>({});
   const [firma, setFirma] = useState("");
+  const [fechaHora, setFechaHora] = useState<string>(""); // datetime-local; vacío = ahora
 
   useEffect(() => {
     if (isOpen) {
@@ -51,6 +53,7 @@ export default function NewTerapiaModal({ isOpen, onClose, paciente, onSuccess }
       setSelectedActividadId("");
       setResultados({});
       setFirma(user?.nombre || "");
+      setFechaHora("");
     }
   }, [isOpen, user]);
 
@@ -116,27 +119,51 @@ export default function NewTerapiaModal({ isOpen, onClose, paciente, onSuccess }
         notas_libres: data.notas_libres || ""
       }));
 
-    const payload = {
+    const payload: Record<string, any> = {
       paciente_id: paciente.id,
       objetivo_id: selectedObjetivoId,
       actividad_id: selectedActividadId,
-      especialidad_id: user?.especialidad_id || 1, // Por defecto 1 o tomar de user
+      especialidad_id: user?.especialidad_id || 1,
       firma_electronica: firma,
-      resultados: resultadosArray
+      resultados: resultadosArray,
     };
+
+    // Solo enviar fecha_hora si el usuario la modificó (sino backend usa now()).
+    if (fechaHora) {
+      payload.fecha_hora = new Date(fechaHora).toISOString();
+    }
 
     try {
       await execute(AppUrls.avanzarApi, "terapias", {
         method: "POST",
-        body: payload
+        body: payload,
       });
       toast.success("Evolución registrada exitosamente.");
       onSuccess();
       onClose();
-    } catch (error) {
-      toast.error("Error al registrar la terapia."+ error);
+    } catch (error: any) {
+      // Mensajes específicos según validaciones del backend (cupo, franja, retroactivo).
+      if (error?.status === 403) {
+        toast.error(
+          error?.message ||
+            "No tienes permiso para registrar terapias retroactivas. Solicita al administrador.",
+        );
+      } else if (error?.status === 422) {
+        const data = error?.payload?.data;
+        if (data?.horas_programadas !== undefined) {
+          toast.error(
+            `Cupo mensual agotado (${data.horas_ejecutadas}/${data.horas_programadas}). Programa más citas antes de registrar.`,
+          );
+        } else {
+          toast.error(error?.message || "No se pudo registrar la terapia.");
+        }
+      } else {
+        toast.error(error?.message || "Error al registrar la terapia.");
+      }
     }
   };
+
+  const isRetroactivo = fechaHora ? new Date(fechaHora) < new Date(new Date().toDateString()) : false;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-fade-in backdrop-blur-sm">
@@ -253,14 +280,49 @@ export default function NewTerapiaModal({ isOpen, onClose, paciente, onSuccess }
               <h3 className="text-xl font-bold text-clinic-text-base">Evolución lista para guardar</h3>
               <p className="text-sm text-clinic-text-muted">Por regulaciones clínicas, debe firmar este registro antes de guardarlo en la historia clínica del paciente.</p>
 
-              <div className="max-w-md mx-auto text-left mt-6">
-                <label className="block text-sm font-semibold text-clinic-text-base mb-2">Firma Electrónica</label>
-                <input
-                  type="text"
-                  value={firma}
-                  readOnly
-                  className="w-full border border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed rounded-clinic-inner p-3 text-sm focus:outline-none text-center font-bold"
-                />
+              <div className="max-w-md mx-auto text-left mt-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-clinic-text-base mb-2">
+                    Fecha y hora de la sesión
+                    <span className="ml-2 text-[10px] font-normal text-gray-400 normal-case">
+                      (opcional — vacío = ahora)
+                    </span>
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={fechaHora}
+                    max={(() => {
+                      const now = new Date();
+                      const pad = (n: number) => String(n).padStart(2, "0");
+                      return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+                    })()}
+                    onChange={(e) => setFechaHora(e.target.value)}
+                    className="w-full border border-gray-200 rounded-clinic-inner p-3 text-sm focus:border-clinic-primary outline-none"
+                  />
+                  {isRetroactivo && (
+                    <p
+                      className={`text-[11px] mt-2 px-3 py-2 rounded-md ${
+                        puedeRetroactivo
+                          ? "bg-amber-50 text-amber-700 border border-amber-200"
+                          : "bg-red-50 text-red-700 border border-red-200"
+                      }`}
+                    >
+                      {puedeRetroactivo
+                        ? "⚠ Registro retroactivo. Quedará marcado en auditoría."
+                        : "⚠ Solo administradores/supervisores pueden registrar fechas anteriores. Solicita autorización."}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-clinic-text-base mb-2">Firma Electrónica</label>
+                  <input
+                    type="text"
+                    value={firma}
+                    readOnly
+                    className="w-full border border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed rounded-clinic-inner p-3 text-sm focus:outline-none text-center font-bold"
+                  />
+                </div>
               </div>
             </div>
           )}

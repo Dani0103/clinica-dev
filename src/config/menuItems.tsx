@@ -4,6 +4,7 @@ import {
   HiOutlineCalendar,
   HiOutlineCog,
   HiOutlineDocumentReport,
+  HiOutlineDocumentDownload,
 } from "react-icons/hi";
 
 export interface MenuItem {
@@ -45,7 +46,14 @@ export const MENU_ITEMS: MenuItem[] = [
     label: "Reportes",
     icon: <HiOutlineDocumentReport size={22} />,
     description: "Supervisión y KPIs",
-    permiso: ["historial.ver", "datos.exportar", "dashboards.ver"],
+    permiso: ["historial.ver", "dashboards.ver"],
+  },
+  {
+    path: "/app/historias-descarga",
+    label: "Descargar HC",
+    icon: <HiOutlineDocumentDownload size={22} />,
+    description: "Descarga de historias clínicas en PDF/ZIP",
+    permiso: ["datos.exportar", "historial.ver"],
   },
   {
     path: "/app/admin/",
