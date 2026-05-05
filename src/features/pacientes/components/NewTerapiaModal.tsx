@@ -59,8 +59,17 @@ export default function NewTerapiaModal({ isOpen, onClose, paciente, onSuccess }
 
   const fetchObjetivos = async () => {
     try {
-      // Nota: Asumiendo que agregaste OBJETIVOS.LIST en apiEndpoints.ts
-      const res = await execute(AppUrls.avanzarApi, "objetivos", { method: "GET" });
+      // Filtra por la especialidad del médico autenticado.
+      // Si el usuario no tiene especialidad asignada, trae todos los objetivos.
+      const params: Record<string, any> = {};
+      if (user?.especialidad_id) {
+        params.especialidad_id = user.especialidad_id;
+      }
+
+      const res = await execute(AppUrls.avanzarApi, "objetivos", {
+        method: "GET",
+        params,
+      });
       if (res && res.data) {
         setObjetivos(res.data);
       }
@@ -176,8 +185,19 @@ export default function NewTerapiaModal({ isOpen, onClose, paciente, onSuccess }
               Registro de Terapia Clínica
             </h3>
             <p className="text-sm text-clinic-text-muted">
-              Paciente: <span className="font-semibold text-clinic-primary">{paciente.nombres} {paciente.apellidos}</span>
+              Paciente:{" "}
+              <span className="font-semibold text-clinic-primary">
+                {paciente.nombres} {paciente.apellidos}
+              </span>
             </p>
+            {user?.especialidad && (
+              <span className="inline-flex items-center gap-1 mt-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-clinic-primary/10 text-clinic-primary">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                {user.especialidad.nombre}
+              </span>
+            )}
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-full hover:bg-gray-200">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -207,7 +227,11 @@ export default function NewTerapiaModal({ isOpen, onClose, paciente, onSuccess }
                     setSelectedActividadId(""); // reset actividad
                   }}
                 >
-                  <option value="" disabled>Seleccionar objetivo...</option>
+                  <option value="" disabled>
+                  {objetivos.length === 0
+                    ? "No hay objetivos para tu especialidad"
+                    : "Seleccionar objetivo..."}
+                </option>
                   {objetivos.map(obj => (
                     <option key={obj.id} value={obj.id}>{obj.nombre}</option>
                   ))}

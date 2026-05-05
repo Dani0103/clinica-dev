@@ -1,7 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { HiOutlineX } from "react-icons/hi";
 import { toast } from "react-toastify";
 import { useObjetivoService } from "@/services";
+import { useEspecialidadService } from "@/services/especialidadService";
+
+interface Especialidad {
+  id: number;
+  nombre: string;
+}
 
 interface NewObjectiveModalProps {
   isOpen: boolean;
@@ -9,7 +15,7 @@ interface NewObjectiveModalProps {
   onSuccess?: () => void;
 }
 
-const initialState = { nombre: "", descripcion: "" };
+const initialState = { nombre: "", descripcion: "", especialidad_id: "" };
 
 const NewObjectiveModal: React.FC<NewObjectiveModalProps> = ({
   isOpen,
@@ -17,7 +23,28 @@ const NewObjectiveModal: React.FC<NewObjectiveModalProps> = ({
   onSuccess,
 }) => {
   const { create, isLoading } = useObjetivoService();
+  const { list: listEspecialidades } = useEspecialidadService();
   const [formData, setFormData] = useState(initialState);
+  const [especialidades, setEspecialidades] = useState<Especialidad[]>([]);
+  const [loadingEsp, setLoadingEsp] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      loadEspecialidades();
+    }
+  }, [isOpen]);
+
+  const loadEspecialidades = async () => {
+    setLoadingEsp(true);
+    try {
+      const res = await listEspecialidades();
+      if (res?.data) setEspecialidades(res.data);
+    } catch {
+      toast.error("No se pudieron cargar las especialidades.");
+    } finally {
+      setLoadingEsp(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -38,6 +65,9 @@ const NewObjectiveModal: React.FC<NewObjectiveModalProps> = ({
       await create({
         nombre: formData.nombre.trim(),
         descripcion: formData.descripcion.trim() || undefined,
+        especialidad_id: formData.especialidad_id
+          ? Number(formData.especialidad_id)
+          : null,
       });
       toast.success("Objetivo clínico creado correctamente");
       onSuccess?.();
@@ -74,6 +104,34 @@ const NewObjectiveModal: React.FC<NewObjectiveModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          {/* Especialidad */}
+          <div>
+            <label className="block text-xs font-bold text-clinic-text-muted uppercase mb-1.5">
+              Especialidad{" "}
+              <span className="text-gray-400 font-normal normal-case">
+                (opcional — sin especialidad = visible para todos)
+              </span>
+            </label>
+            <select
+              value={formData.especialidad_id}
+              onChange={(e) =>
+                setFormData({ ...formData, especialidad_id: e.target.value })
+              }
+              disabled={loadingEsp}
+              className="w-full p-3 border border-gray-200 rounded-clinic-inner outline-none focus:border-clinic-primary focus:ring-2 focus:ring-clinic-primary/10 transition-all text-sm bg-white"
+            >
+              <option value="">
+                {loadingEsp ? "Cargando especialidades..." : "Sin especialidad (general)"}
+              </option>
+              {especialidades.map((esp) => (
+                <option key={esp.id} value={esp.id}>
+                  {esp.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Nombre */}
           <div>
             <label className="block text-xs font-bold text-clinic-text-muted uppercase mb-1.5">
               Nombre del Objetivo
@@ -90,6 +148,7 @@ const NewObjectiveModal: React.FC<NewObjectiveModalProps> = ({
             />
           </div>
 
+          {/* Descripción */}
           <div>
             <label className="block text-xs font-bold text-clinic-text-muted uppercase mb-1.5">
               Descripción o Propósito

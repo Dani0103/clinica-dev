@@ -15,6 +15,7 @@ export interface User {
   activo: boolean;
   esta_activo?: boolean;
   especialidad_id?: number;
+  especialidad?: { id: number; nombre: string };
   permisos: string[];
 }
 

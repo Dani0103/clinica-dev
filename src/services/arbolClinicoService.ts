@@ -4,6 +4,7 @@ import { API_ENDPOINTS, AppUrls } from "@/services/apiEndpoints";
 export interface ObjetivoPayload {
   nombre: string;
   descripcion?: string;
+  especialidad_id?: number | null;
 }
 
 export interface ActividadPayload {
@@ -19,8 +20,10 @@ export interface RespuestaPayload {
 export const useObjetivoService = () => {
   const api = useApi();
 
-  const list = () =>
-    api.execute(AppUrls.avanzarApi, API_ENDPOINTS.OBJETIVOS.LIST);
+  const list = (especialidadId?: number | null) =>
+    api.execute(AppUrls.avanzarApi, API_ENDPOINTS.OBJETIVOS.LIST, {
+      params: especialidadId ? { especialidad_id: especialidadId } : undefined,
+    });
 
   const show = (id: number | string) =>
     api.execute(AppUrls.avanzarApi, API_ENDPOINTS.OBJETIVOS.SHOW(id));
