@@ -46,13 +46,6 @@ interface EspecialidadLite {
 /* ─────────────────────────── Helpers ────────────────────────────────── */
 const pad = (n: number) => String(n).padStart(2, "0");
 
-const saludar = () => {
-  const h = new Date().getHours();
-  if (h < 12) return "Buenos días";
-  if (h < 18) return "Buenas tardes";
-  return "Buenas noches";
-};
-
 const formatHora = (iso: string) => {
   try {
     return new Date(iso).toLocaleTimeString("es-CO", {
@@ -414,8 +407,6 @@ export default function AgendaPage() {
 
   /* ────────────────── Render ────────────────── */
   if (loadingInit) return <PageLoader text="Cargando agenda..." />;
-
-  const nombreUsuario = user?.nombre?.split(" ")[0] ?? "Usuario";
 
   return (
     <section className="h-full flex flex-col gap-4 animate-fade-in">
