@@ -1,8 +1,6 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import {
-  HiOutlineLogout,
   HiOutlineChevronLeft,
   HiOutlineChevronRight,
 } from "react-icons/hi";
@@ -16,8 +14,7 @@ interface SidebarProps {
 
 function Sidebar({ mobileMenuOpen, closeMobileMenu }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
-  const { logout, hasPermiso } = useAuth();
-  const navigate = useNavigate();
+  const { hasPermiso } = useAuth();
 
   const visibleItems = useMemo(
     () =>
@@ -28,12 +25,6 @@ function Sidebar({ mobileMenuOpen, closeMobileMenu }: SidebarProps) {
       ),
     [hasPermiso],
   );
-
-  // Función para cerrar sesión de forma segura
-  const handleLogout = () => {
-    logout();
-    navigate("/");
-  };
 
   return (
     <>
@@ -47,13 +38,13 @@ function Sidebar({ mobileMenuOpen, closeMobileMenu }: SidebarProps) {
 
       <aside
         className={`
-          ${collapsed ? "w-20" : "w-64"} 
+          ${collapsed ? "w-20" : "w-64"}
           bg-clinic-primary text-white flex flex-col transition-all duration-300 h-full shadow-lg
           fixed md:static inset-y-0 left-0 z-50
           ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
         `}
       >
-        {/* Navegación Principal (Le agregamos un pt-8 para que no quede pegado arriba ya que quitamos el logo) */}
+        {/* Navegación Principal */}
         <nav className="flex-1 px-3 pt-8 pb-6 space-y-2 overflow-y-auto">
           {visibleItems.map((item) => (
             <SidebarItem
@@ -66,32 +57,30 @@ function Sidebar({ mobileMenuOpen, closeMobileMenu }: SidebarProps) {
           ))}
         </nav>
 
-        {/* Sección Inferior: Salir y Colapsar */}
-        <div className="p-4 border-t border-white/10 space-y-2">
-          {/* Botón Colapsar Sidebar hacia la izquierda */}
+        {/* Sección Inferior: Colapsar/Expandir menú */}
+        <div className="p-4 border-t border-white/15">
           <button
             onClick={() => setCollapsed((prev) => !prev)}
-            className="w-full flex items-center justify-center gap-3 px-3 py-2.5 rounded-clinic-inner text-clinic-primary-light hover:text-white hover:bg-white/10 transition-colors duration-200"
-            title={collapsed ? "Expandir Menú" : "Ocultar Menú"}
+            title={collapsed ? "Expandir menú" : "Ocultar menú"}
+            aria-label={collapsed ? "Expandir menú" : "Ocultar menú"}
+            aria-expanded={!collapsed}
+            className={`
+              w-full flex items-center gap-2 px-3 py-3 rounded-clinic-inner
+              bg-white text-clinic-primary font-bold text-sm
+              hover:bg-gray-100 hover:text-clinic-primary
+              active:scale-[0.98] active:bg-gray-200
+              shadow-md hover:shadow-lg
+              transition-all duration-200
+              ${collapsed ? "justify-center" : "justify-center"}
+            `}
           >
             {collapsed ? (
-              <HiOutlineChevronRight size={20} />
+              <HiOutlineChevronRight size={22} />
             ) : (
               <>
-                <HiOutlineChevronLeft size={20} />
-                <span className="text-sm font-medium">Ocultar Menú</span>
+                <HiOutlineChevronLeft size={18} />
+                <span>Ocultar menú</span>
               </>
-            )}
-          </button>
-          {/* Botón de Cerrar Sesión */}
-          <button
-            onClick={handleLogout}
-            className="w-full bg-red-500 flex items-center justify-center gap-3 px-3 py-2.5 rounded-clinic-inner text-white hover:bg-red-600 transition-colors duration-200"
-            title="Cerrar Sesión"
-          >
-            <HiOutlineLogout size={22} />
-            {!collapsed && (
-              <span className="text-sm font-medium">Cerrar Sesión</span>
             )}
           </button>
         </div>
