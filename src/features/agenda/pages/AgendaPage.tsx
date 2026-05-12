@@ -409,16 +409,16 @@ export default function AgendaPage() {
   if (loadingInit) return <PageLoader text="Cargando agenda..." />;
 
   return (
-    <section className="h-full flex flex-col gap-4 animate-fade-in">
+    <section className="flex flex-col gap-4 animate-fade-in">
 
       {/* ── CABECERA ── */}
-      <header className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-clinic-text-base flex items-center gap-2">
-            <HiOutlineCalendar className="text-clinic-primary" size={26} />
-            Agendamiento de Citas
+      <header className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-lg sm:text-2xl font-bold text-clinic-text-base flex items-center gap-2 leading-tight">
+            <HiOutlineCalendar className="text-clinic-primary shrink-0" size={22} />
+            <span className="truncate">Agendamiento de Citas</span>
           </h1>
-          <p className="text-sm text-clinic-text-muted mt-0.5">
+          <p className="text-xs sm:text-sm text-clinic-text-muted mt-0.5 truncate">
             {new Date().toLocaleDateString("es-CO", {
               weekday: "long", day: "numeric", month: "long", year: "numeric",
             })}
@@ -429,16 +429,17 @@ export default function AgendaPage() {
         {puedeAgendar && (
           <button
             onClick={() => { resetForm(); setMode("form"); setSelectedCita(null); }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-clinic-primary text-white text-sm font-bold rounded-clinic-inner shadow-sm hover:bg-opacity-90 transition-all"
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-clinic-primary text-white text-xs sm:text-sm font-bold rounded-clinic-inner shadow-sm hover:bg-opacity-90 transition-all shrink-0"
           >
             <HiOutlinePlus size={18} />
-            Nueva Cita
+            <span className="hidden sm:inline">Nueva Cita</span>
+            <span className="sm:hidden">Nueva</span>
           </button>
         )}
 
         {/* Médico: badge informativo de solo lectura */}
         {esMedico && (
-          <span className="flex items-center gap-2 px-3 py-2 bg-clinic-bg-soft text-clinic-accent text-xs font-bold rounded-clinic-inner border border-clinic-accent/20">
+          <span className="hidden sm:flex items-center gap-2 px-3 py-2 bg-clinic-bg-soft text-clinic-accent text-xs font-bold rounded-clinic-inner border border-clinic-accent/20 shrink-0">
             <HiOutlineCalendar size={14} />
             Mis citas agendadas
           </span>
@@ -446,23 +447,23 @@ export default function AgendaPage() {
       </header>
 
       {/* ── BODY: 3 columnas (Recepcionista/Admin) | 2 columnas (Médico) ── */}
-      <div className={`grid grid-cols-1 gap-4 flex-1 overflow-hidden min-h-0 ${
+      <div className={`grid grid-cols-1 gap-4 ${
         puedeAgendar
           ? "lg:grid-cols-[2fr_2.2fr_1.3fr]"
           : "lg:grid-cols-[2fr_2.5fr_1.3fr]"
       }`}>
 
         {/* ══ COL 1: Stats + Lista de citas ══ */}
-        <div className="flex flex-col gap-4 overflow-hidden min-h-0">
+        <div className="flex flex-col gap-4">
 
           {/* Tarjeta stats (gradiente clinic-accent → clinic-primary) */}
           <div
-            className="rounded-clinic-card p-5 text-white shrink-0"
+            className="rounded-clinic-card p-4 sm:p-5 text-white shrink-0"
             style={{ background: "linear-gradient(135deg, #3E36B0 0%, #00ADCD 100%)" }}
           >
-            <p className="text-sm font-semibold opacity-80 mb-1">Visitas de hoy</p>
-            <p className="text-4xl font-bold mb-4">{citasHoy.length}</p>
-            <div className="grid grid-cols-2 gap-3">
+            <p className="text-xs sm:text-sm font-semibold opacity-80 mb-1">Visitas de hoy</p>
+            <p className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4">{citasHoy.length}</p>
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
               {/* Nuevos */}
               <div className="bg-white/15 rounded-clinic-inner p-3">
                 <p className="text-xs opacity-75">Programadas total</p>
@@ -494,7 +495,7 @@ export default function AgendaPage() {
           </div>
 
           {/* Lista de citas del día / filtro */}
-          <div className="flex flex-col bg-white rounded-clinic-card border border-gray-100 shadow-clinic-subtle overflow-hidden flex-1 min-h-0">
+          <div className="flex flex-col bg-white rounded-clinic-card border border-gray-100 shadow-clinic-subtle overflow-hidden max-h-[60vh]">
             {/* Cabecera lista */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 shrink-0">
               <h3 className="text-sm font-bold text-clinic-text-base">Lista de Citas</h3>
@@ -575,7 +576,9 @@ export default function AgendaPage() {
         </div>
 
         {/* ══ COL 2: Detalle de cita / Formulario ══ */}
-        <div className="flex flex-col bg-white rounded-clinic-card border border-gray-100 shadow-clinic-subtle overflow-hidden min-h-0">
+        <div className={`flex-col bg-white rounded-clinic-card border border-gray-100 shadow-clinic-subtle overflow-hidden lg:flex ${
+          (selectedCita || mode === "form") ? "flex" : "hidden lg:flex"
+        }`}>
 
           {mode === "detalle" || !puedeAgendar ? (
             /* ─── PANEL DETALLE ─── */
@@ -898,7 +901,7 @@ export default function AgendaPage() {
         </div>
 
         {/* ══ COL 3: Calendario + Próxima cita ══ */}
-        <div className="flex flex-col gap-4 overflow-y-auto min-h-0">
+        <div className="flex flex-col gap-4">
 
           <MiniCalendar
             citas={citas}

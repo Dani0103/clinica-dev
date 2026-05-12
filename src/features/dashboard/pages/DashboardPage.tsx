@@ -1,6 +1,7 @@
 import { MENU_ITEMS } from "@/config/menuItems";
 import { useAuth } from "@/context/AuthContext";
 import { Link } from "react-router-dom";
+import { HiOutlineSun, HiOutlineMoon } from "react-icons/hi";
 
 function DashboardPage() {
   const { user, hasPermiso } = useAuth();
@@ -11,15 +12,21 @@ function DashboardPage() {
       (!item.permiso || item.permiso.length === 0 ? true : hasPermiso(item.permiso)),
   );
 
+  const hora = new Date().getHours();
+  const saludo =
+    hora < 12 ? "Buenos días" : hora < 19 ? "Buenas tardes" : "Buenas noches";
+  const SaludoIcon = hora < 19 ? HiOutlineSun : HiOutlineMoon;
+
   return (
     <section className="space-y-6">
       {/* Encabezado Personalizado */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-clinic-text-base flex items-center gap-2 animate-fade-in">
-          ¡Bienvenid@, {user?.nombre || "Usuario"}! 👋
+          <SaludoIcon className="text-clinic-primary shrink-0" size={28} />
+          {saludo}, {user?.nombre || "Usuario"}
         </h1>
-        <p className="ttext-sm sm:text-base text-clinic-text-muted mt-1 animate-fade-in">
-          Resumen general de la información para {user?.correo}
+        <p className="text-sm sm:text-base text-clinic-text-muted mt-1 animate-fade-in">
+          Este es tu portal personal. Accede a tus módulos disponibles desde las tarjetas a continuación.
         </p>
       </div>
 

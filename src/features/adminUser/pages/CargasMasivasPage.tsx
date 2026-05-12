@@ -106,7 +106,7 @@ export default function CargasMasivasPage() {
   ];
 
   return (
-    <div className="p-6 min-h-full space-y-6 animate-fade-in">
+    <div className="min-h-full space-y-6 animate-fade-in">
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-clinic-text-base">

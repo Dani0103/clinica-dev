@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { HiOutlineSearch } from "react-icons/hi";
+import { HiOutlineSearch, HiChevronDown } from "react-icons/hi";
 import { toast } from "react-toastify";
 import { usePacienteService } from "@/services";
 import type { EstadoPacienteFiltro } from "@/services/pacienteService";
@@ -42,6 +42,7 @@ export default function PacientesPage() {
   const [balance, setBalance] = useState<BalanceHoras | null>(null);
   const [loadingBalance, setLoadingBalance] = useState(false);
   const [accionEstado, setAccionEstado] = useState(false);
+  const [detallesAbiertos, setDetallesAbiertos] = useState(false);
 
   const { list, darAlta, reactivar, balanceHoras, isLoading } = usePacienteService();
   const { hasPermiso } = useAuth();
@@ -193,13 +194,13 @@ export default function PacientesPage() {
   };
 
   return (
-    <div className="p-6 min-h-full space-y-6 animate-fade-in">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-clinic-text-base">
+    <div className="min-h-full space-y-4 sm:space-y-6 animate-fade-in">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div className="min-w-0">
+          <h1 className="text-lg sm:text-3xl font-bold text-clinic-text-base leading-tight">
             {selectedPaciente ? "Historia Clínica del Paciente" : "Gestión de Pacientes"}
           </h1>
-          <p className="text-sm sm:text-base text-clinic-text-muted mt-1">
+          <p className="text-xs sm:text-base text-clinic-text-muted mt-1 truncate">
             {selectedPaciente
               ? `Expediente clínico de ${selectedPaciente.nombres} ${selectedPaciente.apellidos}`
               : "Busca por documento o nombre para abrir un expediente."}
@@ -263,24 +264,36 @@ export default function PacientesPage() {
       {isLoading && pacientes.length === 0 ? (
         <PageLoader variant="page" text="Sincronizando con el servidor..." />
       ) : selectedPaciente ? (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 h-fit sticky top-6">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-clinic-primary/20 to-clinic-primary/5 flex items-center justify-center text-clinic-primary font-bold text-2xl shadow-inner">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+          <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-100 h-fit lg:sticky lg:top-6">
+            <div className="flex items-center gap-3 sm:gap-4 lg:mb-6">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-clinic-primary/20 to-clinic-primary/5 flex items-center justify-center text-clinic-primary font-bold text-lg sm:text-2xl shadow-inner shrink-0">
                 {selectedPaciente.nombres[0]}
                 {selectedPaciente.apellidos[0]}
               </div>
-              <div className="overflow-hidden">
-                <h2 className="text-xl font-bold text-clinic-text-base truncate">
+              <div className="overflow-hidden flex-1 min-w-0">
+                <h2 className="text-base sm:text-xl font-bold text-clinic-text-base truncate">
                   {selectedPaciente.nombres}
                 </h2>
-                <p className="text-sm text-gray-500 font-medium">
+                <p className="text-xs sm:text-sm text-gray-500 font-medium truncate">
                   CC: {selectedPaciente.cedula}
                 </p>
               </div>
+              {/* Toggle solo en móvil */}
+              <button
+                type="button"
+                onClick={() => setDetallesAbiertos((v) => !v)}
+                aria-label={detallesAbiertos ? "Ocultar detalles" : "Ver detalles"}
+                aria-expanded={detallesAbiertos}
+                className="lg:hidden shrink-0 w-9 h-9 flex items-center justify-center rounded-full text-clinic-primary bg-clinic-primary/10 hover:bg-clinic-primary/20 transition-all"
+              >
+                <HiChevronDown
+                  className={`w-5 h-5 transition-transform ${detallesAbiertos ? "rotate-180" : ""}`}
+                />
+              </button>
             </div>
 
-            <div className="space-y-4 text-sm">
+            <div className={`${detallesAbiertos ? "block" : "hidden"} lg:block mt-4 lg:mt-0 space-y-4 text-sm`}>
               <div className="flex justify-between border-b border-gray-50 pb-3">
                 <span className="text-gray-500">Estado</span>
                 {selectedPaciente.esta_activo === false ? (
@@ -315,7 +328,7 @@ export default function PacientesPage() {
             </div>
 
             {/* Balance de horas mensual */}
-            <div className="mt-6 p-4 rounded-xl border border-gray-100 bg-gradient-to-br from-clinic-primary/5 to-transparent">
+            <div className={`${detallesAbiertos ? "block" : "hidden"} lg:block mt-6 p-4 rounded-xl border border-gray-100 bg-gradient-to-br from-clinic-primary/5 to-transparent`}>
               <div className="flex justify-between items-center mb-2">
                 <span className="text-[10px] font-bold uppercase text-gray-500 tracking-wider">
                   Balance del mes
@@ -370,54 +383,26 @@ export default function PacientesPage() {
               )}
             </div>
 
-            <button
-              onClick={() => setIsModalOpen(true)}
-              disabled={selectedPaciente.esta_activo === false}
-              title={
-                selectedPaciente.esta_activo === false
-                  ? "Reactiva el paciente para registrar terapias"
-                  : ""
-              }
-              className={`w-full mt-6 font-bold py-3.5 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 transform active:scale-95 ${
-                selectedPaciente.esta_activo === false
-                  ? "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"
-                  : "bg-clinic-primary text-white shadow-clinic-primary/20 hover:bg-clinic-primary-light"
-              }`}
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-              Nueva terapia
-            </button>
-
             {puedeGestionar && (
-              selectedPaciente.esta_activo === false ? (
-                <button
-                  onClick={handleReactivar}
-                  disabled={accionEstado}
-                  className="w-full mt-3 font-bold py-2.5 rounded-xl border-2 border-green-500 text-green-600 hover:bg-green-50 transition-all disabled:opacity-50"
-                >
-                  {accionEstado ? "Reactivando…" : "Reactivar paciente"}
-                </button>
-              ) : (
-                <button
-                  onClick={handleDarAlta}
-                  disabled={accionEstado}
-                  className="w-full mt-3 font-bold py-2.5 rounded-xl border-2 border-red-300 text-red-600 hover:bg-red-50 transition-all disabled:opacity-50"
-                >
-                  {accionEstado ? "Procesando…" : "Dar de alta"}
-                </button>
-              )
+              <div className={`${detallesAbiertos ? "block" : "hidden"} lg:block`}>
+                {selectedPaciente.esta_activo === false ? (
+                  <button
+                    onClick={handleReactivar}
+                    disabled={accionEstado}
+                    className="w-full mt-6 font-bold py-2.5 rounded-xl border-2 border-green-500 text-green-600 hover:bg-green-50 transition-all disabled:opacity-50"
+                  >
+                    {accionEstado ? "Reactivando…" : "Reactivar paciente"}
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleDarAlta}
+                    disabled={accionEstado}
+                    className="w-full mt-6 font-bold py-2.5 rounded-xl border-2 border-red-300 text-red-600 hover:bg-red-50 transition-all disabled:opacity-50"
+                  >
+                    {accionEstado ? "Procesando…" : "Dar de alta"}
+                  </button>
+                )}
+              </div>
             )}
           </div>
 
@@ -425,6 +410,8 @@ export default function PacientesPage() {
             <PacienteHistoriaTabs
               key={`${selectedPaciente.id}-${refreshKey}`}
               pacienteId={selectedPaciente.id}
+              onNuevaTerapia={() => setIsModalOpen(true)}
+              puedeRegistrarTerapia={selectedPaciente.esta_activo !== false}
             />
           </div>
         </div>

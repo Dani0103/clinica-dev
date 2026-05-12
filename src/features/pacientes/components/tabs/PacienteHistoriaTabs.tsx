@@ -26,6 +26,8 @@ type TabKey =
 
 interface Props {
   pacienteId: number;
+  onNuevaTerapia?: () => void;
+  puedeRegistrarTerapia?: boolean;
 }
 
 interface TabDef {
@@ -81,7 +83,11 @@ const EmptyState = ({ msg }: { msg: string }) => (
     {msg}
   </div>
 );
-export default function PacienteHistoriaTabs({ pacienteId }: Props) {
+export default function PacienteHistoriaTabs({
+  pacienteId,
+  onNuevaTerapia,
+  puedeRegistrarTerapia = true,
+}: Props) {
   const [active, setActive] = useState<TabKey>("evoluciones");
   const [openModal, setOpenModal] = useState<TabKey | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -146,7 +152,7 @@ export default function PacienteHistoriaTabs({ pacienteId }: Props) {
 
   // Por tab: contador + acción
   const newButtonLabel: Record<TabKey, string> = {
-    evoluciones: "",
+    evoluciones: "Nueva terapia",
     ingreso: "Nueva historia",
     consentimientos: "Nuevo consentimiento",
     ordenes: "Nueva orden",
@@ -164,17 +170,17 @@ export default function PacienteHistoriaTabs({ pacienteId }: Props) {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 min-h-[400px]">
-      <div className="flex flex-wrap gap-2 border-b border-gray-100 pb-3 mb-5">
+    <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-100 min-h-[400px]">
+      <div className="flex gap-2 overflow-x-auto border-b border-gray-100 pb-3 mb-5 -mx-1 px-1 scrollbar-thin">
         {TABS.map((t) => (
           <button
             key={t.key}
             onClick={() => setActive(t.key)}
-            className={`text-sm px-3 py-2 rounded-clinic-inner font-semibold transition-all ${active === t.key ? "bg-clinic-primary text-white shadow-sm" : "text-clinic-text-muted hover:bg-gray-50"}`}
+            className={`shrink-0 text-xs sm:text-sm px-2.5 sm:px-3 py-2 rounded-clinic-inner font-semibold transition-all whitespace-nowrap ${active === t.key ? "bg-clinic-primary text-white shadow-sm" : "text-clinic-text-muted hover:bg-gray-50"}`}
           >
             {t.label}
             <span
-              className={`ml-2 text-[10px] px-1.5 py-0.5 rounded-full ${active === t.key ? "bg-white/20" : "bg-gray-100 text-gray-500"}`}
+              className={`ml-1.5 sm:ml-2 text-[10px] px-1.5 py-0.5 rounded-full ${active === t.key ? "bg-white/20" : "bg-gray-100 text-gray-500"}`}
             >
               {counts[t.key]}
             </span>
@@ -182,15 +188,34 @@ export default function PacienteHistoriaTabs({ pacienteId }: Props) {
         ))}
       </div>
 
-      {/* Botón "Nuevo" (no aplica para evoluciones — se crea desde el botón principal del header) */}
+      {/* Botón "Nuevo" en el área superior derecha */}
       {newButtonLabel[active] && (
         <div className="flex justify-end mb-4">
-          <button
-            onClick={() => setOpenModal(active)}
-            className="flex items-center gap-2 px-4 py-2 bg-clinic-primary text-white text-sm font-bold rounded-clinic-inner hover:bg-opacity-90 shadow-sm transition-all"
-          >
-            <HiOutlinePlus size={18} /> {newButtonLabel[active]}
-          </button>
+          {active === "evoluciones" ? (
+            <button
+              onClick={() => onNuevaTerapia?.()}
+              disabled={!puedeRegistrarTerapia}
+              title={
+                !puedeRegistrarTerapia
+                  ? "Reactiva el paciente para registrar terapias"
+                  : ""
+              }
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-clinic-inner shadow-sm transition-all ${
+                puedeRegistrarTerapia
+                  ? "bg-clinic-primary text-white hover:bg-opacity-90"
+                  : "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"
+              }`}
+            >
+              <HiOutlinePlus size={18} /> {newButtonLabel[active]}
+            </button>
+          ) : (
+            <button
+              onClick={() => setOpenModal(active)}
+              className="flex items-center gap-2 px-4 py-2 bg-clinic-primary text-white text-sm font-bold rounded-clinic-inner hover:bg-opacity-90 shadow-sm transition-all"
+            >
+              <HiOutlinePlus size={18} /> {newButtonLabel[active]}
+            </button>
+          )}
         </div>
       )}
 

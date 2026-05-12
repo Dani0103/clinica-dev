@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useApi } from "@/hooks/useApi";
 import { API_ENDPOINTS, AppUrls } from "@/services/apiEndpoints";
 import { toast } from "react-toastify"; // 1. Importamos toast
+import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ const Login: React.FC = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,15 +114,31 @@ const Login: React.FC = () => {
               </div>
             </div>
 
-            <input
-              type="password"
-              id="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2.5 sm:px-4 sm:py-3 text-sm sm:text-base rounded-clinic-inner border border-gray-200 focus:border-clinic-primary focus:ring-2 focus:ring-clinic-primary-light outline-none transition-all placeholder:text-gray-300"
-              placeholder="••••••••"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-3 py-2.5 sm:px-4 sm:py-3 pr-10 sm:pr-12 text-sm sm:text-base rounded-clinic-inner border border-gray-200 focus:border-clinic-primary focus:ring-2 focus:ring-clinic-primary-light outline-none transition-all placeholder:text-gray-300"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                aria-label={
+                  showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                }
+                className="absolute inset-y-0 right-0 flex items-center pr-3 sm:pr-4 text-clinic-text-muted hover:text-clinic-primary focus:outline-none transition-colors"
+              >
+                {showPassword ? (
+                  <HiOutlineEyeOff className="w-5 h-5" />
+                ) : (
+                  <HiOutlineEye className="w-5 h-5" />
+                )}
+              </button>
+            </div>
             <p className="text-[9px] sm:text-[10px] text-clinic-text-muted mt-1.5 sm:mt-2 leading-relaxed">
               * La contraseña debe incluir mayúsculas, números y mínimo 8
               caracteres.
